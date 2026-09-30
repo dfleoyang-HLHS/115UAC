@@ -117,7 +117,44 @@ for rec in csv.DictReader(open(HERE / "115四技申請_校系分則.csv", encodi
         "date": rec["第二階段複試日期"], "ann": rec["公告錄取名單日期"], "url": rec["網址"],
     })
 
-js = "window.TECH=" + json.dumps(tech_out, ensure_ascii=False, separators=(",", ":")) + ";\n"
+# ---------- 歷年錄取結果（依檔名開頭的學年度自動讀取，例如 114繁星推薦_錄取標準.csv） ----------
+def years_of(suffix):
+    return sorted({int(m.group(1)) for p in HERE.glob(f"*{suffix}") if (m := re.match(r"(\d{3})", p.name))}, reverse=True)
+
+
+def dash(v):
+    return "" if v in ("", "--") else v
+
+
+HIST = {"star": {}, "apply": {}, "dist": {}}
+for y in years_of("繁星推薦_錄取標準.csv"):
+    for x in csv.DictReader(open(HERE / f"{y}繁星推薦_錄取標準.csv", encoding="utf-8-sig")):
+        items = []
+        for i in range(1, 12):
+            it = x.get(f"比序{i}_項目", "")
+            if not it:
+                break
+            items.append([it, dash(x[f"比序{i}_第一輪標準"]), dash(x[f"比序{i}_第二輪標準"])])
+        HIST["star"].setdefault(x["校系代碼"], {}).setdefault(str(y), []).append({
+            "k": x["名額類別"], "ins": x["主修樂器"], "q": x["招生名額"], "n": x["總錄取人數(第八類為通過篩選人數)"],
+            "g8": x["學群類別"] == "第八類學群", "n1": dash(x["第一輪人數"]), "n2": dash(x["第二輪人數"]), "it": items})
+for y in years_of("申請入學_篩選標準.csv"):
+    for x in csv.DictReader(open(HERE / f"{y}申請入學_篩選標準.csv", encoding="utf-8-sig")):
+        seq = [x[f"篩選順序{i}"] for i in range(1, 12) if dash(x.get(f"篩選順序{i}", ""))]
+        h = HIST["apply"].setdefault(x["校系代碼"], {}).setdefault(str(y), {"sv": [], "en": []})
+        h["sv"].append({"sex": x["性別要求"], "maj": x["主修"], "q": x["招生名額"], "seq": seq, "same": x["同級分超額篩選"] == "*"})
+for y in years_of("申請入學_分發標準.csv"):
+    for x in csv.DictReader(open(HERE / f"{y}申請入學_分發標準.csv", encoding="utf-8-sig")):
+        h = HIST["apply"].setdefault(x["校系代碼"], {}).setdefault(str(y), {"sv": [], "en": []})
+        h["en"].append({"t": x["名額類別"], "sk": dash(x["術科項目別"]), "sex": x["性別限制"], "s": x["分發最低標準"]})
+for y in years_of("分發入學_錄取結果.csv"):
+    for x in csv.DictReader(open(HERE / f"{y}分發入學_錄取結果.csv", encoding="utf-8-sig")):
+        HIST["dist"].setdefault(x["系組代碼"], {})[str(y)] = {
+            "n": x["錄取人數(含外加)"], "s": x["普通生錄取分數"], "ts": x["普通生同分參酌科目"], "tv": x["普通生同分參酌分數"],
+            "sp": {k: x[f"{k}錄取分數"] for k in ["原住民", "退伍軍人", "僑生", "蒙藏生", "派外子女"] if x[f"{k}錄取分數"]}}
+
+js = "window.HIST=" + json.dumps(HIST, ensure_ascii=False, separators=(",", ":")) + ";\n"
+js += "window.TECH=" + json.dumps(tech_out, ensure_ascii=False, separators=(",", ":")) + ";\n"
 js += "window.DIST=" + json.dumps(dist_out, ensure_ascii=False, separators=(",", ":")) + ";\n"
 js += "window.STAR=" + json.dumps(star, ensure_ascii=False, separators=(",", ":")) + ";\n"
 js += "window.APPLY=" + json.dumps(apply, ensure_ascii=False, separators=(",", ":")) + ";\n"

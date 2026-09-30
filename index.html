@@ -186,6 +186,21 @@ nav a .badge{display:inline-block;min-width:20px;padding:0 6px;margin-left:4px;b
 .xroute{display:flex;flex-direction:column}
 .xroute .links{margin-top:auto;padding-top:10px}
 .xroute > ul,.xroute > p:not(.xtag){margin-bottom:12px}
+/* 查詢結果：左側志願篩選、右側歷年錄取結果 */
+.row-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(240px,34%);gap:14px}
+.row-main{min-width:0}
+.hist{border-left:1px dashed var(--line);padding-left:14px;font-size:13px;min-width:0;display:flex;flex-direction:column;gap:8px}
+.hist-t{font-size:12px;letter-spacing:.08em;color:var(--muted)}
+.hyear{display:flex;flex-direction:column;gap:4px}
+.hy{font-weight:700;color:var(--accent);font-variant-numeric:tabular-nums}
+.hline{display:flex;flex-wrap:wrap;gap:4px 6px;align-items:baseline;line-height:1.5}
+.hline b{font-weight:600;margin-right:2px}
+.hnum{font-size:15px;font-variant-numeric:tabular-nums}
+.hchip{display:inline-block;padding:0 7px;border-radius:6px;border:1px solid var(--line);background:var(--bg);font-size:12px;white-space:nowrap}
+.hchip.ok{background:var(--ok-soft);color:var(--ok);border-color:transparent}
+.hchip.bad{background:var(--bad-soft);color:var(--bad);border-color:transparent}
+.hchip.warn{background:var(--warn-soft);color:var(--warn);border-color:transparent}
+@media (max-width:760px){.row-grid{grid-template-columns:1fr}.hist{border-left:0;border-top:1px dashed var(--line);padding:10px 0 0}}
 @media (prefers-reduced-motion:reduce){.entry{transition:none}}
 @media (max-width:600px){header{padding-block:10px} header .wrap{gap:6px 10px} header h1{font-size:16px;flex:1} nav{order:3;width:100%;margin-left:0;flex-wrap:wrap;gap:2px} nav a{padding:4px 8px;font-size:14px} .theme-btn{padding:3px 10px}}
 </style>
@@ -373,7 +388,7 @@ nav a .badge{display:inline-block;min-width:20px;padding:0 6px;margin-left:4px;b
   </section>
 </main>
 
-<script src="data.js?v=20260930b"></script>
+<script src="data.js?v=20261001"></script>
 <script>
 const SUBJ = ["國文","英文","數學A","數學B","社會","自然"];
 const LEVELS = ["頂標","前標","均標","後標","底標"];
@@ -605,6 +620,119 @@ function renderTech(r, res){
   </div></div>`;
 }
 
+// ---------- 歷年錄取結果（右側欄） ----------
+// 資料在 window.HIST，依年度由新到舊；只做參考比對，不影響左側的志願篩選判定
+const HISTORY = window.HIST || {star: {}, apply: {}, dist: {}};
+const ABBR_SUBJ = [["數學A", "數學A"], ["數學B", "數學B"], ["數A", "數學A"], ["數B", "數學B"], ["國文", "國文"], ["英文", "英文"],
+  ["社會", "社會"], ["自然", "自然"], ["國", "國文"], ["英", "英文"], ["社", "社會"], ["自", "自然"]];
+// 「國英數B社52」「(國文+英文)27」「數學A14」→ {subs:[...], v:52}；APCS、術科等無法計算的回傳 subs:null
+function parseSieve(t){
+  const m = String(t).match(/^(.*?)(\d+(?:\.\d+)?)$/);
+  if (!m) return null;
+  let name = m[1].replace(/[()（）]/g, "");
+  const subs = [];
+  const parts = name.includes("+") ? name.split("+") : [name];
+  for (let p of parts){
+    const whole = ABBR_SUBJ.find(([k]) => k === p);
+    if (whole && parts.length > 1){ subs.push(whole[1]); continue; }
+    while (p){
+      const hit = ABBR_SUBJ.find(([k]) => p.startsWith(k));
+      if (!hit) return {subs: null, v: +m[2]};
+      subs.push(hit[1]); p = p.slice(hit[0].length);
+    }
+  }
+  return {subs, v: +m[2]};
+}
+function sieveMine(t, sc){
+  const p = parseSieve(t);
+  if (!p || !p.subs) return null;
+  if (p.subs.some(s => sc[s] === "" || sc[s] == null)) return null;
+  const mine = p.subs.reduce((a, s) => a + (+sc[s]), 0);
+  return {mine, ok: mine >= p.v};
+}
+const yearsOf = h => Object.keys(h || {}).sort((a, b) => b - a);
+const chip = (txt, cls = "") => `<span class="hchip ${cls}">${txt}</span>`;
+
+function histStar(r){
+  const h = HISTORY.star[r.c];
+  if (!h) return "";
+  const rank = $("rank").value.trim();
+  return yearsOf(h).map(y => h[y].map(e => {
+    const label = [e.ins && `《${esc(e.ins)}》`, e.k === "外加" && "外加名額"].filter(Boolean).join(" ");
+    const verb = e.g8 ? "通過篩選" : "錄取";
+    const rounds = [[1, e.n1], [2, e.n2]].filter(([, n]) => n).map(([k, n]) => {
+      const std = e.it.map(([it, a, b]) => [it, k === 1 ? a : b]).filter(([, v]) => v);
+      const first = std[0];
+      let cmp = "";
+      if (first && first[0] === "在校學業" && rank !== "" && /%$/.test(first[1])){
+        cmp = +rank <= parseFloat(first[1]) ? chip(`你 前${rank}%`, "ok") : chip(`你 前${rank}%`, "bad");
+      }
+      return `<div class="hline"><b>第${k === 1 ? "一" : "二"}輪 ${esc(n)} 人</b>${std.map(([it, v]) => `${esc(it)} ${esc(v)}`).join("、") || "—"} ${cmp}</div>`;
+    }).join("");
+    return `<div class="hyear"><div class="hy">${y}${label ? " " + label : ""}</div>
+      <div class="hline">名額 ${esc(e.q)}，${verb} ${esc(e.n)} 人</div>${rounds || '<div class="hline note">無分發比序資料</div>'}</div>`;
+  }).join("")).join("");
+}
+
+function histApply(r, sc){
+  const h = HISTORY.apply[r.c];
+  if (!h) return "";
+  return yearsOf(h).map(y => {
+    const {sv, en} = h[y];
+    const sieve = sv.map(s => {
+      const tag = [s.maj && `《${esc(s.maj)}》`, s.sex !== "無" && s.sex].filter(Boolean).join(" ");
+      const seq = s.seq.map((t, i) => {
+        const m = sieveMine(t, sc);
+        return chip(`${i + 1}. ${esc(t)}${m ? `（你 ${m.mine}）` : ""}`, m ? (m.ok ? "ok" : "bad") : "");
+      }).join("");
+      return `<div class="hline"><b>篩選${tag ? " " + tag : ""}</b>${seq || "未列最低級分"}${s.same ? chip("同級分超額篩選", "") : ""}</div>`;
+    }).join("");
+    const ent = en.length ? `<div class="hline"><b>分發最低標準</b>${en.map(e => chip(`${esc(e.t)}${e.sk ? "《" + esc(e.sk) + "》" : ""}：${esc(e.s)}`,
+      e.s === "正取" ? "ok" : /^備/.test(e.s) ? "warn" : "")).join("")}</div>` : "";
+    return `<div class="hyear"><div class="hy">${y}</div>${sieve}${ent}</div>`;
+  }).join("");
+}
+
+function histDist(r, res){
+  const h = HISTORY.dist[r.c];
+  if (!h) return "";
+  return yearsOf(h).map(y => {
+    const e = h[y];
+    let cmp = "";
+    if (e.s && res && res.total){
+      const [lo, hi] = res.total, cut = +e.s;
+      const txt = lo === hi ? `你 ${lo}` : `你 ${lo}～${hi}`;
+      cmp = chip(txt, lo >= cut ? "ok" : hi >= cut ? "warn" : "bad");
+    }
+    const sp = Object.entries(e.sp || {}).map(([k, v]) => `${k} ${esc(v)}`).join("、");
+    return `<div class="hyear"><div class="hy">${y}</div>
+      <div class="hline">錄取 ${esc(e.n)} 人${e.s ? `，最低 <b class="hnum">${esc(e.s)}</b>` : "（未錄取）"} ${cmp}</div>
+      ${e.ts ? `<div class="hline note">同分參酌：${esc(e.ts)} ${esc(e.tv)}</div>` : ""}
+      ${sp ? `<div class="hline note">${sp}</div>` : ""}</div>`;
+  }).join("");
+}
+
+function histPanel(m, r, res, sc){
+  const body = m === "star" ? histStar(r) : m === "apply" ? histApply(r, sc) : m === "dist" ? histDist(r, res) : "";
+  return `<aside class="hist"><div class="hist-t">歷年錄取結果</div>${body || '<div class="hline note">尚無歷年資料</div>'}</aside>`;
+}
+// 把原本的列包成「左：志願篩選結果、右：歷年錄取結果」
+function withHist(html, m, r, res, sc){
+  const open = '<div class="row">';
+  if (!html.startsWith(open)) return html;
+  return `<div class="row"><div class="row-grid"><div class="row-main">${html.slice(open.length, -6)}</div>${histPanel(m, r, res, sc)}</div></div>`;
+}
+// 選擇庫比較表用的一行摘要
+function histBrief(m, r, res){
+  const y = k => yearsOf(HISTORY[m][r.c])[0];
+  if (m === "dist"){ const h = HISTORY.dist[r.c]; if (!h) return "--"; const e = h[y()]; return `${y()}：最低 ${e.s || "未錄取"}（${e.n} 人）`; }
+  if (m === "star"){ const h = HISTORY.star[r.c]; if (!h) return "--"; const e = h[y()].find(x => x.k === "一般") || h[y()][0];
+    const f = e.it.find(([, a]) => a); return `${y()}：錄取 ${e.n}/${e.q}${f ? `，第一輪 ${f[0]} ${f[1]}` : ""}`; }
+  if (m === "apply"){ const h = HISTORY.apply[r.c]; if (!h) return "--"; const d = h[y()];
+    const s = d.sv[0], e = d.en.find(x => x.t === "招生"); return `${y()}：${s && s.seq.length ? "篩選 " + s.seq.join("、") : "未列篩選級分"}${e ? `；分發 ${e.s}` : ""}`; }
+  return "--";
+}
+
 function weighted(r, sc){ // 個人申請：依學測成績採計方式計算加權級分（僅供參考）
   let sum = 0, used = false;
   for (const [s,, , w] of r.sub){
@@ -707,7 +835,7 @@ function refresh(resetPage = true){
     });
   }
   const slice = out.slice(0, shown);
-  $("list").innerHTML = slice.map(([r,res]) => mode === "star" ? renderStar(r, res) : mode === "apply" ? renderApply(r, res, sc) : mode === "tech" ? renderTech(r, res) : renderDist(r, res)).join("")
+  $("list").innerHTML = slice.map(([r,res]) => withHist(mode === "star" ? renderStar(r, res) : mode === "apply" ? renderApply(r, res, sc) : mode === "tech" ? renderTech(r, res) : renderDist(r, res), mode, r, res, sc)).join("")
     || '<div class="card note">沒有符合條件的校系，試著調整篩選條件。</div>';
   $("more-btn").classList.toggle("hidden", out.length <= shown);
   $("more-btn").textContent = `顯示更多（還有 ${out.length - shown} 筆）`;
@@ -831,6 +959,7 @@ function renderCompare(){
   const cell = (html, cls = "") => `<td class="${cls}">${html}</td>`;
   const ol = arr => arr.length ? `<ol>${arr.map(t => `<li>${esc(t)}</li>`).join("")}</ol>` : "--";
   let body = line("判定", ({res}) => cell(res.ok ? "符合" : "未符合", res.ok ? "ok" : "bad"));
+  body += line("歷年錄取結果", ({r, res}) => cell(esc(histBrief(cmpTab, r, res))));
   if (cmpTab === "star"){
     body += line("學群類別", ({r}) => cell(esc(r.g)));
     body += line("招生名額", ({r}) => cell(`<span class="num">${esc(r.q)}</span>`));
@@ -952,7 +1081,7 @@ $("list").addEventListener("click", e => {
     return;
   }
   const top = e.target.closest(".top");
-  if (top) top.parentElement.classList.toggle("open");
+  if (top) top.closest(".row").classList.toggle("open");
 });
 $("ctabs").addEventListener("click", e => { const b = e.target.closest("[data-tab]"); if (b){ cmpTab = b.dataset.tab; renderCompare(); } });
 $("cmp-body").addEventListener("click", e => {
