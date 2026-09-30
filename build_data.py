@@ -206,6 +206,17 @@ for y in years_of("分發入學_錄取結果.csv"):
             # 有「校系條件與招生名額錄取人數一覽表」合併進來的年度才有招生名額（核定＋回流）
             "q": x.get("招生名額", ""), "rf": x.get("回流名額", "")}
     report.append(f"{y} 分發：對應 {m.hit} 列、未對應 {m.miss} 列")
+# 四技申請第一階段最低篩選標準（百分制＝加權平均級分 ÷ 15 × 100）
+HIST["tech"] = {}
+M["tech"] = Matcher(tech_out)
+for y in years_of("四技申請_篩選標準.csv"):
+    m = M["tech"]; m.hit = m.miss = 0
+    for x in csv.DictReader(open(HERE / f"{y}四技申請_篩選標準.csv", encoding="utf-8-sig")):
+        code = m(x["學校"], x["系組名稱"], x["志願代碼"])
+        if code:
+            HIST["tech"].setdefault(code, {})[str(y)] = {
+                "s": x["學測成績最低篩選標準"], "a": x["APCS超額篩選最低標準級分"], "aw": x["APCS超額篩選標準加權成績"]}
+    report.append(f"{y} 四技：對應 {m.hit} 列、未對應 {m.miss} 列")
 print("\n".join(report))
 
 # ---------- 離原聯保（師資培育公費生保送甄試）：取最新學年度的校系分則，代碼自成一套，不與其他管道合併 ----------

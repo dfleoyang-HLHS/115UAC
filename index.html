@@ -388,7 +388,7 @@ nav a .badge{display:inline-block;min-width:20px;padding:0 6px;margin-left:4px;b
   </section>
 </main>
 
-<script src="data.js?v=20261008"></script>
+<script src="data.js?v=20261009"></script>
 <script>
 const SUBJ = ["國文","英文","數學A","數學B","社會","自然"];
 const LEVELS = ["頂標","前標","均標","後標","底標"];
@@ -713,8 +713,23 @@ function histDist(r, res){
   }).join("");
 }
 
+// 四技申請：第一階段最低篩選標準為百分制（加權平均級分 ÷ 15 × 100），換算回級分並與你的加權平均比較
+function histTech(r, res){
+  const h = (HISTORY.tech || {})[r.c];
+  if (!h) return "";
+  const mine = res && res.avg != null ? Math.round(res.avg / 15 * 10000) / 100 : null;
+  return yearsOf(h).map(y => {
+    const e = h[y];
+    const lv = e.s ? Math.round(+e.s * 15 / 100 * 100) / 100 : null;
+    const cmp = e.s && mine != null ? chip(`你 ${mine}`, mine >= +e.s ? "ok" : "bad") : "";
+    const apcs = e.a ? `<div class="hline note">APCS 超額篩選：最低 ${esc(e.a)} 級，標準加權成績 ${esc(e.aw || "--")}</div>` : "";
+    return `<div class="hyear"><div class="hy">${y}</div>
+      <div class="hline">第一階段最低 <b class="hnum">${esc(e.s || "--")}</b>${lv != null ? `<span class="note">（加權平均約 ${lv} 級分）</span>` : ""} ${cmp}</div>${apcs}</div>`;
+  }).join("");
+}
+
 function histPanel(m, r, res, sc){
-  const body = m === "star" ? histStar(r) : m === "apply" ? histApply(r, sc) : m === "dist" ? histDist(r, res) : "";
+  const body = m === "star" ? histStar(r) : m === "apply" ? histApply(r, sc) : m === "dist" ? histDist(r, res) : m === "tech" ? histTech(r, res) : "";
   return `<aside class="hist"><div class="hist-t">歷年錄取結果</div>${body || '<div class="hline note">尚無歷年資料</div>'}</aside>`;
 }
 // 把原本的列包成「左：志願篩選結果、右：歷年錄取結果」
@@ -725,10 +740,11 @@ function withHist(html, m, r, res, sc){
 }
 // 選擇庫比較表用的一行摘要
 function histBrief(m, r, res){
-  const y = k => yearsOf(HISTORY[m][r.c])[0];
+  const y = k => yearsOf((HISTORY[m] || {})[r.c])[0];
   if (m === "dist"){ const h = HISTORY.dist[r.c]; if (!h) return "--"; const e = h[y()]; return `${y()}：最低 ${e.s || "未錄取"}（${e.n} 人）`; }
   if (m === "star"){ const h = HISTORY.star[r.c]; if (!h) return "--"; const e = h[y()].find(x => x.k === "一般") || h[y()][0];
     const f = e.it.find(([, a]) => a); return `${y()}：錄取 ${e.n}/${e.q}${f ? `，第一輪 ${f[0]} ${f[1]}` : ""}`; }
+  if (m === "tech"){ const h = (HISTORY.tech || {})[r.c]; if (!h) return "--"; const e = h[y()]; return `${y()}：第一階段最低 ${e.s || "--"}${e.a ? `（APCS ${e.a} 級）` : ""}`; }
   if (m === "apply"){ const h = HISTORY.apply[r.c]; if (!h) return "--"; const d = h[y()];
     const s = d.sv[0], e = d.en.find(x => x.t === "招生"); return `${y()}：${s && s.seq.length ? "篩選 " + s.seq.join("、") : "未列篩選級分"}${e ? `；分發 ${e.s}` : ""}`; }
   return "--";
