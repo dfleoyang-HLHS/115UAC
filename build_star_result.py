@@ -6,7 +6,7 @@
 第一層是學校清單，第二層是各校 PDF。以同一個連線階段（保留 cookie、帶清單頁 Referer）
 模擬點擊下載，PDF 存在 繁星115錄取標準_PDF/，再用 pdfplumber 解析表格。
 
-用法：uv run --with pdfplumber --with beautifulsoup4 python build_star_result.py
+用法：uv run --with pdfplumber --with beautifulsoup4 --no-binary-package charset-normalizer python build_star_result.py [學年度，預設 115]
 輸出：115繁星推薦_錄取標準.csv（一列一個校系）
 """
 import csv
@@ -20,10 +20,11 @@ import pdfplumber
 from bs4 import BeautifulSoup
 
 HERE = Path(__file__).parent
-BASE = "https://www.cac.edu.tw/cacportal/star_his_report/115/115_result_standard"
+YEAR = sys.argv[1] if len(sys.argv) > 1 else "115"
+BASE = f"https://www.cac.edu.tw/cacportal/star_his_report/{YEAR}/{YEAR}_result_standard"
 GROUPS = [("one2seven", "第一至七類學群"), ("eight", "第八類學群")]
-PDF_DIR = HERE / "繁星115錄取標準_PDF"
-OUT = HERE / "115繁星推薦_錄取標準.csv"
+PDF_DIR = HERE / f"繁星{YEAR}錄取標準_PDF"
+OUT = HERE / f"{YEAR}繁星推薦_錄取標準.csv"
 UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120 Safari/537.36"
 COOKIES = PDF_DIR / "cookies.txt"
 SUBJ = ["國文", "英文", "數學A", "數學B", "社會", "自然", "英聽"]
@@ -68,8 +69,13 @@ def download():
         schools = []
         for a in soup.find_all("a"):
             m = re.match(r"\((\d+)\)(.+)", a.get_text(strip=True))
-            if m and a.get("href", "").endswith(".pdf"):
-                schools.append((m.group(1), m.group(2), a["href"]))
+            # 115 年：href 直接是 PDF；114 年：href 為 javascript，PDF 路徑在 onclick="openPdfWithViewer('./001/...pdf')"
+            href = a.get("href", "")
+            if not href.endswith(".pdf"):
+                j = re.search(r"'([^']+\.pdf)'", a.get("onclick", ""))
+                href = j.group(1) if j else ""
+            if m and href:
+                schools.append((m.group(1), m.group(2), href))
         print(f"{label}：{len(schools)} 所學校")
         for code, name, href in schools:
             pdf = PDF_DIR / f"{key}_{code}.pdf"

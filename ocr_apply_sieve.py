@@ -6,8 +6,10 @@
 3. 校系代碼、招生名額、檢定標準、篩選倍率與 115 校系分則（apply115.db）交叉核對，
    不一致的格子列入 115申請入學_篩選標準_待確認.csv。
 
-用法：uv run --with rapidocr-onnxruntime --with opencv-python-headless python ocr_apply_sieve.py [學校代碼...]
-輸出：115申請入學_篩選標準.csv
+用法：uv run --with rapidocr-onnxruntime --with opencv-python-headless python ocr_apply_sieve.py [--year 114] [學校代碼...]
+輸出：{學年度}申請入學_篩選標準.csv
+沒有該年度校系分則資料庫（apply{學年度}.db）時，檢定標準與篩選倍率改用 OCR 辨識並檢查格式，
+校系名稱取自同年度分發標準網頁（文字）。
 """
 import csv
 import difflib
@@ -21,9 +23,19 @@ import numpy as np
 from rapidocr_onnxruntime import RapidOCR
 
 HERE = Path(__file__).parent
-IMG_DIR = HERE / "申請115結果_原始資料" / "篩選標準圖片"
-OUT = HERE / "115申請入學_篩選標準.csv"
-REVIEW = HERE / "115申請入學_篩選標準_待確認.csv"
+ARGS = sys.argv[1:]
+YEAR = "115"
+if ARGS[:1] == ["--year"]:
+    YEAR, ARGS = ARGS[1], ARGS[2:]
+FIX_ONLY = ARGS[:1] == ["--fix-only"]      # 不重新 OCR，只對既有 CSV 重新套用校正規則
+if FIX_ONLY:
+    ARGS = ARGS[1:]
+RAW = HERE / f"申請{YEAR}結果_原始資料"
+IMG_DIR = RAW / "篩選標準圖片"
+OUT = HERE / f"{YEAR}申請入學_篩選標準.csv"
+REVIEW = HERE / f"{YEAR}申請入學_篩選標準_待確認.csv"
+DB = HERE / f"apply{YEAR}.db"
+FULL_OCR = not DB.exists()          # 沒有同年度分則資料庫時，檢定與倍率也要辨識
 SUBJ = ["國文", "英文", "數學A", "數學B", "社會", "自然"]
 # 一般校系表格的 25 欄
 COLS = (["校系代碼", "性別要求", "校系名稱", "招生名額"]
@@ -153,31 +165,101 @@ def parse_image(path):
             t = cell(4)
             if re.search(r"[\u4e00-\u9fff]", t) and "標" not in t:
                 major = t
+        # 一般校系（25 欄）才能逐格對應檢定 7 欄與倍率 7 欄
+        std = [cell(i) for i in range(4, 18)] if FULL_OCR and n == len(COLS) else []
         rows.append({"code": code, "gender": cell(1), "quota": cell(3), "major": major,
-                     "seqs": seqs, "same": same, "ncols": n, "nseq": k})
+                     "seqs": seqs, "same": same, "ncols": n, "nseq": k, "std": std})
     return rows
 
 
-def main():
-    schools = dict(csv.reader(open(HERE / "申請115結果_原始資料" / "篩選標準學校清單.csv", encoding="utf-8-sig")))
-    schools.pop("學校代碼", None)
-    only = sys.argv[1:]
-    db = sqlite3.connect(HERE / "apply115.db")
-    ref = {c: (q, g, n, sk) for c, q, g, n, sk in db.execute(
-        "select code, admit_quota, gender_requirement, dept_name, skill_test_required from departments")}
-    subj, skill, apcs = {}, {}, {}
-    for c, s_, st, m in db.execute("select code, subject_name, standard, multiplier from subject_screening"):
-        subj.setdefault(c, {})[s_] = (st, m)
-    for c, s_, st, m in db.execute("select code, item_name, standard, multiplier from skill_test_screening where item_name not in ('--','')"):
-        skill.setdefault(c, []).append(f"{s_}(檢定{st or '--'}、倍率{m or '--'})")
-    for c, s_, st, m in db.execute("select code, item_name, standard, multiplier from extra_screening"):
-        apcs.setdefault(c, []).append(f"{s_}(檢定{st or '--'}、倍率{m or '--'})")
+# 篩選順序中會出現的科目與術科項目名稱，用來校正 OCR 誤字（如「彩缩技法」→「彩繪技法」）
+VOCAB = ["國文", "英文", "數學A", "數學B", "社會", "自然", "素描", "彩繪技法", "水墨書畫", "創意表現", "美術鑑賞",
+         "主修", "副修", "樂理", "視唱", "聽寫", "APCS識讀", "APCS實作", "體育百分等級", "程式識讀", "程式實作"]
 
+
+SEQ_CHARS = str.maketrans({"敷": "數", "园": "國", "囤": "國", "曾": "會", "缩": "繪", "书": "畫", "现": "現", "级": "級", "题": "",
+                           "國": "國", "术": "術", "赏": "賞", "画": "畫", "绘": "繪", "创": "創", "体": "體"})
+ABBR_RE = re.compile(r"[國英數AB社自]+")
+
+
+def fix_seq(v):
+    m = re.fullmatch(r"(\(?)(.+?)(\)?)(\d+(?:\.\d+)?)", v)
+    if not m:
+        return v
+    name = m.group(2).translate(SEQ_CHARS)
+    toks = name.split("+") if "+" in name else [name]
+    parts = []
+    for t in toks:
+        if t not in VOCAB and not (len(toks) == 1 and ABBR_RE.fullmatch(t)):
+            best = difflib.get_close_matches(t, VOCAB, n=1, cutoff=0.5)
+            # 跨行的長名稱常被截斷（「美術鑑賞」→「美衍T」）：字首只對應一個已知名稱時就用它
+            same_head = [w for w in VOCAB if w[0] == t[:1]]
+            t = best[0] if best else same_head[0] if len(same_head) == 1 else t
+        parts.append(t)
+    return f"{m.group(1)}{'+'.join(parts)}{m.group(3)}{m.group(4)}"
+
+
+def postfix(rows, head, order):
+    """rows：CSV 資料列（list）。套用招生名額、主修、篩選順序的校正，回傳 (rows, 待確認清單)。"""
+    H = {h: i for i, h in enumerate(head)}
+    by_code = {}
+    for r in rows:
+        by_code.setdefault(r[H["校系代碼"]], []).append(r)
+    review = []
+    for code, rs in by_code.items():
+        want = order.get(code, [])
+        # 主修：同校系列數與分發標準的樂器數相同時，依分發標準的順序指派（圖片與網頁排列順序一致）
+        if want and len(want) == len(rs):
+            for r, m in zip(rs, want):
+                r[H["主修"]] = m
+        for r in rs:
+            if r[H["主修"]] and r[H["主修"]] not in want:
+                if want:
+                    best = difflib.get_close_matches(r[H["主修"]], want, n=1, cutoff=0.3)
+                    r[H["主修"]] = best[0] if best else r[H["主修"]]
+                    if not best:
+                        review.append([r[0], r[1], code, r[H["校系名稱"]], r[H["主修"]], "主修無法對應分發標準"])
+                else:
+                    r[H["主修"]] = ""          # 非音樂校系卻讀出「主修」，是檢定欄被誤判
+                    if r[H["表格類別"]] == "音樂":
+                        r[H["表格類別"]] = "APCS" if "APCS" in " ".join(r) else "一般"
+            q = re.sub(r"\D+$", "", r[H["招生名額"]])     # 「2.」「22.」：數字後多出的雜點
+            r[H["招生名額"]] = q
+            if not re.fullmatch(r"\d+", q):
+                review.append([r[0], r[1], code, r[H["校系名稱"]], r[H["主修"]], f"招生名額 可疑：{q}"])
+            for i in range(1, 12):
+                k = H[f"篩選順序{i}"]
+                r[k] = fix_seq(r[k])
+    return rows, review
+
+
+def main():
+    schools = dict(csv.reader(open(RAW / "篩選標準學校清單.csv", encoding="utf-8-sig")))
+    schools.pop("學校代碼", None)
+    only = ARGS
+    ref, subj, skill, apcs = {}, {}, {}, {}
     # 主修樂器名稱以分發標準（網頁文字）的「術科項目別」校正 OCR 誤字，例如「理作曲」→「理論作曲」
-    majors = {}
-    for x in csv.DictReader(open(HERE / "115申請入學_分發標準.csv", encoding="utf-8-sig")):
+    majors, names, ent_sex, order = {}, {}, {}, {}
+    for x in csv.DictReader(open(HERE / f"{YEAR}申請入學_分發標準.csv", encoding="utf-8-sig")):
+        names[x["校系代碼"]] = x["學系(組)名稱"]
+        if x["名額類別"] == "招生" and x["術科項目別"] not in ("--", "") and x["術科項目別"] not in order.get(x["校系代碼"], []):
+            order.setdefault(x["校系代碼"], []).append(x["術科項目別"])
+        if x["名額類別"] == "招生" and x["性別限制"] in ("男", "女"):
+            ent_sex.setdefault(x["校系代碼"], []).append(x["性別限制"])
         if x["術科項目別"] not in ("--", ""):
             majors.setdefault(x["校系代碼"], set()).add(x["術科項目別"])
+    if not FULL_OCR:
+        db = sqlite3.connect(DB)
+        ref = {c: (q, g, n, sk) for c, q, g, n, sk in db.execute(
+            "select code, admit_quota, gender_requirement, dept_name, skill_test_required from departments")}
+        for c, s_, st, m in db.execute("select code, subject_name, standard, multiplier from subject_screening"):
+            subj.setdefault(c, {})[s_] = (st, m)
+        for c, s_, st, m in db.execute("select code, item_name, standard, multiplier from skill_test_screening where item_name not in ('--','')"):
+            skill.setdefault(c, []).append(f"{s_}(檢定{st or '--'}、倍率{m or '--'})")
+        for c, s_, st, m in db.execute("select code, item_name, standard, multiplier from extra_screening"):
+            apcs.setdefault(c, []).append(f"{s_}(檢定{st or '--'}、倍率{m or '--'})")
+    std_pat = re.compile(r"--|頂標|前標|均標|後標|底標|[ABC]級?")
+    mul_pat = re.compile(r"--|\d+(\.\d+)?")
 
     maxseq = 11
     head = (["學校代碼", "學校", "校系代碼", "性別要求", "校系名稱", "主修", "招生名額", "表格類別"]
@@ -185,17 +267,34 @@ def main():
             + [f"篩選順序{i}" for i in range(1, maxseq + 1)] + ["同級分超額篩選"])
     pat = re.compile(r"--|[\(\)（）\u4e00-\u9fffAB+APCS.]+\d+(\.\d+)?")
     out_rows, review = [], []
+    if FIX_ONLY:
+        old = list(csv.reader(open(OUT, encoding="utf-8-sig")))
+        rows, review = postfix(old[1:], old[0], order)
+        with open(OUT, "w", newline="", encoding="utf-8-sig") as f:
+            csv.writer(f).writerows([old[0]] + rows)
+        with open(REVIEW, "w", newline="", encoding="utf-8-sig") as f:
+            w = csv.writer(f)
+            w.writerow(["學校代碼", "學校", "校系代碼", "校系名稱", "主修", "待確認內容"])
+            w.writerows(review)
+        print(f"校正完成：{len(rows)} 列，待確認 {len(review)} 列")
+        return
     for sc in sorted(schools):
         if only and sc not in only:
             continue
         rows = parse_image(IMG_DIR / f"{sc}.png")
         print(f"{sc} {schools[sc]}：{len(rows)} 列", flush=True)
-        counts = {}
+        counts, seen = {}, {}
         for r in rows:
             counts[r["code"]] = counts.get(r["code"], 0) + 1
         for r in rows:
             code, issues = r["code"], []
-            if code not in ref:
+            if FULL_OCR:
+                q_ref, name = r["quota"], names.get(code, "")
+                if not name:
+                    issues.append("校系代碼不在分發標準")
+                if not re.fullmatch(r"\d+", r["quota"]):
+                    issues.append(f"招生名額 可疑：{r['quota']}")
+            elif code not in ref:
                 issues.append("校系代碼不在分則")
                 q_ref, g_ref, name, sk = "", "", "", ""
             else:
@@ -209,18 +308,33 @@ def main():
             multi = counts[code] > 1          # 同一校系分男女或分主修樂器，名額以圖片為準
             g = r["gender"]
             gender = "男" if "男" in g else "女" if "女" in g else "無"
+            # 男女分列但 OCR 讀不出時，依分發標準網頁同校系「招生」列的性別限制順序補上
+            idx = seen[code] = seen.get(code, -1) + 1
+            if gender == "無" and multi and not r["major"] and idx < len(ent_sex.get(code, [])):
+                gender = ent_sex[code][idx]
             if r["quota"] != q_ref and not multi:
                 issues.append(f"招生名額 OCR={r['quota']} 分則={q_ref}")
             if multi and gender == "無" and not r["major"]:
                 issues.append("同一校系有多列，但辨識不出性別或主修")
-            kind = ("APCS" if code in apcs else "音樂" if r["major"] else
+            kind = ("APCS" if code in apcs or (FULL_OCR and r["ncols"] != len(COLS) and r["nseq"] == 6) else "音樂" if r["major"] else
                     "術科(美術/體育/音樂)" if r["nseq"] >= 11 else "一般")
-            sub = subj.get(code, {})
             row = [sc, schools[sc], code, gender, name, r["major"], r["quota"], kind]
-            row += [(sub.get(s_, ("--", "--"))[0] or "--") for s_ in SUBJ + ["英聽"]]
-            row += [(sub.get(s_, ("--", "--"))[1] or "--") for s_ in SUBJ]
-            row += ["、".join(f"{k}×{m}" for k, (st, m) in sub.items() if k not in SUBJ + ["英聽"] and m and m != "--") or "--"]
-            row += ["；".join(apcs.get(code, []) or skill.get(code, [])) or "--"]
+            if FULL_OCR:
+                st = r["std"] or [""] * 14          # 術科／APCS 表格的檢定、倍率為上下兩層，不逐格辨識
+                std7 = [re.sub(r"級$", "", v) if i == 6 else v for i, v in enumerate(st[:7])]
+                for nm, v in zip(SUBJ + ["英聽"], std7):
+                    if v and not std_pat.fullmatch(v):
+                        issues.append(f"檢定_{nm} 可疑：{v}")
+                for nm, v in zip(SUBJ + ["學測科目組合"], st[7:14]):
+                    if v and not mul_pat.fullmatch(v):
+                        issues.append(f"倍率_{nm} 可疑：{v}")
+                row += std7 + st[7:14] + ["見原始圖片" if not r["std"] else "--"]
+            else:
+                sub = subj.get(code, {})
+                row += [(sub.get(s_, ("--", "--"))[0] or "--") for s_ in SUBJ + ["英聽"]]
+                row += [(sub.get(s_, ("--", "--"))[1] or "--") for s_ in SUBJ]
+                row += ["、".join(f"{k}×{m}" for k, (st, m) in sub.items() if k not in SUBJ + ["英聽"] and m and m != "--") or "--"]
+                row += ["；".join(apcs.get(code, []) or skill.get(code, [])) or "--"]
             seqs = r["seqs"] + ["--"] * (maxseq - len(r["seqs"]))
             for i, v in enumerate(r["seqs"], 1):
                 if not pat.fullmatch(v):
@@ -233,6 +347,8 @@ def main():
             if issues:
                 review.append([sc, schools[sc], code, name, r["major"], "；".join(issues)])
 
+    out_rows, extra = postfix(out_rows, head, order)
+    review = [x for x in review if not re.search(r"招生名額|主修無法", x[-1])] + extra
     with open(OUT, "w", newline="", encoding="utf-8-sig") as f:
         w = csv.writer(f)
         w.writerow(head)

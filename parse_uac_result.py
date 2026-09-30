@@ -21,12 +21,14 @@ ABBR = {"國": "國文(學測)", "英": "英文(學測)", "數A": "數學A(學�
 SPECIAL = ["原住民", "退伍軍人", "僑生", "蒙藏生", "派外子女"]
 # PDF 把術科一律寫成「術」，改依同系組在 115 分發校系分則中的術科名稱（音樂／美術／體育）補全
 SKILL = {}
-rule = HERE / "115分發入學_校系分則.csv"
+rule = HERE / f"{OUT.name[:3]}分發入學_校系分則.csv"   # 與輸出同一學年度
 if rule.exists():
     for x in csv.DictReader(open(rule, encoding="utf-8-sig")):
         for i in range(1, 6):
             if "(術科)" in x.get(f"採計科目{i}", ""):
-                SKILL[x["系組代碼"]] = x[f"採計科目{i}"]
+                # 115 年分則有系組代碼；114 年簡章沒有，改用「校名|學系」對應
+                key = x.get("系組代碼") or f"{x['校名']}|{x['學系']}"
+                SKILL[key] = x[f"採計科目{i}"]
 
 
 def clean(v):
@@ -59,13 +61,16 @@ with open(OUT, "w", newline="", encoding="utf-8-sig") as f:
     w.writerow(head)
     for x in rows:
         row = [x["code"], x["school"], x["dept"]]
+        # 錄取結果的系名可能多了「(男)」「(女)」或「-鋼琴.聲樂…」等分組字樣，去掉後再對應分則
+        base = re.sub(r"\((男|女)\)$", "", x["dept"].split("-")[0])
+        sk = SKILL.get(x["code"]) or SKILL.get(f"{x['school']}|{x['dept']}") or SKILL.get(f"{x['school']}|{base}") or "術科"
         for i in range(maxw):
             if i < len(x["weights"]):
                 s, m = x["weights"][i]
-                row += [SKILL.get(x["code"], "術科") if s == "術" else ABBR.get(s, s), m]
+                row += [sk if s == "術" else ABBR.get(s, s), m]
             else:
                 row += ["", ""]
-        tie = SKILL.get(x["code"], "術科") if x["tie_s"] == "術" else ABBR.get(x["tie_s"], x["tie_s"])
+        tie = sk if x["tie_s"] == "術" else ABBR.get(x["tie_s"], x["tie_s"])
         row += [x["n"], x["score"], tie, x["tie_v"]] + x["special"] + [x["page"]]
         w.writerow(row)
 print(f"{len({x['school'] for x in rows})} 所學校，{len(rows)} 個系組，採計科目最多 {maxw} 科 -> {OUT.name}")

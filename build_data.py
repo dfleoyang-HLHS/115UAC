@@ -1,5 +1,6 @@
 """把 star115.db / apply115.db 整理成網頁用的 data.js（index.html 會載入）。"""
 import csv
+import difflib
 import json
 import re
 import sqlite3
@@ -126,32 +127,84 @@ def dash(v):
     return "" if v in ("", "--") else v
 
 
+# 各年度的校系代碼可能被重新分配給別的系（例如東吳 00520：114 化學系、115 物理學系），
+# 所以歷年資料一律以「學校＋系名」對應到目前網頁（115）的校系；系名只有細微差異
+# （如「資訊管理學系資訊管理組」vs「資訊管理學系(資訊管理組)」）時，才以相同代碼且名稱相似度 ≥ 0.75 補對應。
+def norm(t):
+    t = re.sub(r"\s+", "", t or "")
+    for a_, b_ in (("（", "("), ("）", ")"), ("台", "臺"), ("．", "."), ("‧", "."), ("・", ".")):
+        t = t.replace(a_, b_)
+    return t
+
+
+class Matcher:
+    def __init__(self, records):
+        self.by_name = {norm(r["s"]) + "|" + norm(r["d"]): r["c"] for r in records}
+        self.by_code = {r["c"]: (norm(r["s"]), norm(r["d"])) for r in records}
+        self.hit = self.miss = 0
+
+    def __call__(self, school, name, code):
+        k = norm(school) + "|" + norm(name)
+        if k in self.by_name:
+            self.hit += 1
+            return self.by_name[k]
+        w = self.by_code.get(code)
+        if w and w[0] == norm(school) and difflib.SequenceMatcher(None, w[1], norm(name)).ratio() >= 0.75:
+            self.hit += 1
+            return code
+        self.miss += 1
+        return None
+
+
 HIST = {"star": {}, "apply": {}, "dist": {}}
+M = {"star": Matcher(star), "apply": Matcher(apply), "dist": Matcher(dist_out)}
+report = []
 for y in years_of("繁星推薦_錄取標準.csv"):
+    m = M["star"]; m.hit = m.miss = 0
     for x in csv.DictReader(open(HERE / f"{y}繁星推薦_錄取標準.csv", encoding="utf-8-sig")):
+        code = m(x["學校"], x["校系名稱"], x["校系代碼"])
+        if not code:
+            continue
         items = []
         for i in range(1, 12):
             it = x.get(f"比序{i}_項目", "")
             if not it:
                 break
             items.append([it, dash(x[f"比序{i}_第一輪標準"]), dash(x[f"比序{i}_第二輪標準"])])
-        HIST["star"].setdefault(x["校系代碼"], {}).setdefault(str(y), []).append({
+        HIST["star"].setdefault(code, {}).setdefault(str(y), []).append({
             "k": x["名額類別"], "ins": x["主修樂器"], "q": x["招生名額"], "n": x["總錄取人數(第八類為通過篩選人數)"],
             "g8": x["學群類別"] == "第八類學群", "n1": dash(x["第一輪人數"]), "n2": dash(x["第二輪人數"]), "it": items})
+    report.append(f"{y} 繁星：對應 {m.hit} 列、未對應 {m.miss} 列")
 for y in years_of("申請入學_篩選標準.csv"):
+    m = M["apply"]; m.hit = m.miss = 0
     for x in csv.DictReader(open(HERE / f"{y}申請入學_篩選標準.csv", encoding="utf-8-sig")):
+        code = m(x["學校"], x["校系名稱"], x["校系代碼"])
+        if not code:
+            continue
         seq = [x[f"篩選順序{i}"] for i in range(1, 12) if dash(x.get(f"篩選順序{i}", ""))]
-        h = HIST["apply"].setdefault(x["校系代碼"], {}).setdefault(str(y), {"sv": [], "en": []})
+        h = HIST["apply"].setdefault(code, {}).setdefault(str(y), {"sv": [], "en": []})
         h["sv"].append({"sex": x["性別要求"], "maj": x["主修"], "q": x["招生名額"], "seq": seq, "same": x["同級分超額篩選"] == "*"})
+    report.append(f"{y} 申請篩選：對應 {m.hit} 列、未對應 {m.miss} 列")
 for y in years_of("申請入學_分發標準.csv"):
+    m = M["apply"]; m.hit = m.miss = 0
     for x in csv.DictReader(open(HERE / f"{y}申請入學_分發標準.csv", encoding="utf-8-sig")):
-        h = HIST["apply"].setdefault(x["校系代碼"], {}).setdefault(str(y), {"sv": [], "en": []})
+        code = m(x["學校"], x["學系(組)名稱"], x["校系代碼"])
+        if not code:
+            continue
+        h = HIST["apply"].setdefault(code, {}).setdefault(str(y), {"sv": [], "en": []})
         h["en"].append({"t": x["名額類別"], "sk": dash(x["術科項目別"]), "sex": x["性別限制"], "s": x["分發最低標準"]})
+    report.append(f"{y} 申請分發：對應 {m.hit} 列、未對應 {m.miss} 列")
 for y in years_of("分發入學_錄取結果.csv"):
+    m = M["dist"]; m.hit = m.miss = 0
     for x in csv.DictReader(open(HERE / f"{y}分發入學_錄取結果.csv", encoding="utf-8-sig")):
-        HIST["dist"].setdefault(x["系組代碼"], {})[str(y)] = {
+        code = m(x["校名"], x["系組名"], x["系組代碼"])
+        if not code:
+            continue
+        HIST["dist"].setdefault(code, {})[str(y)] = {
             "n": x["錄取人數(含外加)"], "s": x["普通生錄取分數"], "ts": x["普通生同分參酌科目"], "tv": x["普通生同分參酌分數"],
             "sp": {k: x[f"{k}錄取分數"] for k in ["原住民", "退伍軍人", "僑生", "蒙藏生", "派外子女"] if x[f"{k}錄取分數"]}}
+    report.append(f"{y} 分發：對應 {m.hit} 列、未對應 {m.miss} 列")
+print("\n".join(report))
 
 js = "window.HIST=" + json.dumps(HIST, ensure_ascii=False, separators=(",", ":")) + ";\n"
 js += "window.TECH=" + json.dumps(tech_out, ensure_ascii=False, separators=(",", ":")) + ";\n"

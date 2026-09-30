@@ -9,9 +9,10 @@
     本程式只負責下載圖片；OCR 辨識由 ocr_apply_sieve.py 處理。
 
 兩者都用同一個 cookie 檔（同一個連線階段），並帶上一頁當 Referer，模擬從清單頁點進去。
-用法：uv run --with beautifulsoup4 python build_apply_result.py
+用法：uv run --with beautifulsoup4 python build_apply_result.py [學年度，預設 115]
 """
 import csv
+import sys
 import re
 import subprocess
 import time
@@ -20,10 +21,11 @@ from pathlib import Path
 from bs4 import BeautifulSoup
 
 HERE = Path(__file__).parent
-ROOT = "https://www.cac.edu.tw/cacportal/apply_his_report/115"
-ENT = f"{ROOT}/115_entrance_standard"
-SIEVE = f"{ROOT}/115_sieve_standard"
-RAW = HERE / "申請115結果_原始資料"
+YEAR = sys.argv[1] if len(sys.argv) > 1 else "115"
+ROOT = f"https://www.cac.edu.tw/cacportal/apply_his_report/{YEAR}"
+ENT = f"{ROOT}/{YEAR}_entrance_standard"
+SIEVE = f"{ROOT}/{YEAR}_sieve_standard"
+RAW = HERE / f"申請{YEAR}結果_原始資料"
 COOKIES = RAW / "cookies.txt"
 UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120 Safari/537.36"
 
@@ -63,7 +65,7 @@ def entrance():
             if tds[0]:
                 code, dept = tds[0], tds[1]
             rows.append([sc, name, code, dept, tds[2], tds[3], tds[4], tds[5]])
-    out = HERE / "115申請入學_分發標準.csv"
+    out = HERE / f"{YEAR}申請入學_分發標準.csv"
     with open(out, "w", newline="", encoding="utf-8-sig") as fh:
         w = csv.writer(fh)
         w.writerow(["學校代碼", "學校", "校系代碼", "學系(組)名稱", "名額類別", "術科項目別", "性別限制", "分發最低標準"])
