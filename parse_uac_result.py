@@ -19,16 +19,30 @@ ABBR = {"國": "國文(學測)", "英": "英文(學測)", "數A": "數學A(學�
         "生": "生物(分科)", "歷": "歷史(分科)", "地": "地理(分科)", "公": "公民與社會(分科)",
         "音": "音樂(術科)", "美": "美術(術科)", "體": "體育(術科)"}
 SPECIAL = ["原住民", "退伍軍人", "僑生", "蒙藏生", "派外子女"]
-# PDF 把術科一律寫成「術」，改依同系組在 115 分發校系分則中的術科名稱（音樂／美術／體育）補全
-SKILL = {}
-rule = HERE / f"{OUT.name[:3]}分發入學_校系分則.csv"   # 與輸出同一學年度
-if rule.exists():
+# PDF 把術科一律寫成「術」，依序以下列方式補全為 音樂／美術／體育(術科)：
+#   1. 同學年度分發校系分則（115 年以系組代碼、114 年以「校名|學系」對應）
+#   2. 其他學年度分則中同校同系名的術科（例如 113 年沒有分則，借用 114、115 年）
+#   3. 依系名關鍵字判斷
+SKILL, OTHER = {}, {}
+YEAR_OF_OUT = OUT.name[:3]
+for rule in sorted(HERE.glob("*分發入學_校系分則.csv")):
+    same = rule.name.startswith(YEAR_OF_OUT)
     for x in csv.DictReader(open(rule, encoding="utf-8-sig")):
         for i in range(1, 6):
             if "(術科)" in x.get(f"採計科目{i}", ""):
-                # 115 年分則有系組代碼；114 年簡章沒有，改用「校名|學系」對應
-                key = x.get("系組代碼") or f"{x['校名']}|{x['學系']}"
-                SKILL[key] = x[f"採計科目{i}"]
+                if same:
+                    SKILL[x.get("系組代碼") or f"{x['校名']}|{x['學系']}"] = x[f"採計科目{i}"]
+                OTHER[f"{x['校名']}|{x['學系']}"] = x[f"採計科目{i}"]
+
+
+def guess_skill(dept):
+    if "音樂" in dept:
+        return "音樂(術科)"
+    if re.search(r"體育|運動|競技", dept):
+        return "體育(術科)"
+    if re.search(r"美術|設計|雕塑|書畫|工藝|視覺|藝術", dept):
+        return "美術(術科)"
+    return "術科"
 
 
 def clean(v):
@@ -63,7 +77,8 @@ with open(OUT, "w", newline="", encoding="utf-8-sig") as f:
         row = [x["code"], x["school"], x["dept"]]
         # 錄取結果的系名可能多了「(男)」「(女)」或「-鋼琴.聲樂…」等分組字樣，去掉後再對應分則
         base = re.sub(r"\((男|女)\)$", "", x["dept"].split("-")[0])
-        sk = SKILL.get(x["code"]) or SKILL.get(f"{x['school']}|{x['dept']}") or SKILL.get(f"{x['school']}|{base}") or "術科"
+        sk = (SKILL.get(x["code"]) or SKILL.get(f"{x['school']}|{x['dept']}") or SKILL.get(f"{x['school']}|{base}")
+              or OTHER.get(f"{x['school']}|{x['dept']}") or OTHER.get(f"{x['school']}|{base}") or guess_skill(x["dept"]))
         for i in range(maxw):
             if i < len(x["weights"]):
                 s, m = x["weights"][i]

@@ -46,7 +46,7 @@ def curl(url, referer, out=None):
 def entrance():
     index = f"{ENT}/standard_index.php"
     soup = BeautifulSoup(curl(index, "https://www.cac.edu.tw/"), "html.parser")
-    schools = [(re.search(r"(\d+)", a["href"]).group(1), a.get_text(strip=True), a["href"])
+    schools = [(re.search(r"(\d+)", a["href"]).group(1), re.sub(r"^\(\d+\)", "", a.get_text(strip=True)), a["href"])  # 113 年校名前有「(001)」
                for a in soup.find_all("a") if re.match(r"standard_\d+\.html", a.get("href", ""))]
     print(f"分發標準：{len(schools)} 所學校")
     rows = []

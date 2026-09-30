@@ -227,6 +227,17 @@ def postfix(rows, head, order):
             r[H["招生名額"]] = q
             if not re.fullmatch(r"\d+", q):
                 review.append([r[0], r[1], code, r[H["校系名稱"]], r[H["主修"]], f"招生名額 可疑：{q}"])
+            # 倍率（OCR 辨識的年度）：「2.」→「2」，並檢查格式
+            for s_ in SUBJ + ["學測科目組合"]:
+                k = H[f"倍率_{s_}"]
+                v = re.sub(r"(?<=\d)\.$", "", r[k])
+                r[k] = v
+                if v and s_ != "學測科目組合" and not re.fullmatch(r"--|\d+(\.\d+)?", v):
+                    review.append([r[0], r[1], code, r[H["校系名稱"]], r[H["主修"]], f"倍率_{s_} 可疑：{v}"])
+            for s_ in SUBJ + ["英聽"]:
+                v = r[H[f"檢定_{s_}"]]
+                if v and not re.fullmatch(r"--|頂標|前標|均標|後標|底標|[ABC]級?|見原始圖片", v):
+                    review.append([r[0], r[1], code, r[H["校系名稱"]], r[H["主修"]], f"檢定_{s_} 可疑：{v}"])
             for i in range(1, 12):
                 k = H[f"篩選順序{i}"]
                 r[k] = fix_seq(r[k])

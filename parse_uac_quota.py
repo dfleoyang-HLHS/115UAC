@@ -9,6 +9,7 @@
 import csv
 import re
 import sys
+import unicodedata
 from pathlib import Path
 
 import pdfplumber
@@ -22,7 +23,8 @@ NEW = ["檢定標準1", "檢定標準2", "檢定標準3", "英聽檢定", "同�
 
 
 def clean(v):
-    return re.sub(r"\s+", " ", (v or "")).strip()
+    # 部分 PDF 用「CJK 相容表意文字」（如 U+F98C 歷），外觀相同但編碼不同，先以 NFKC 正規化
+    return re.sub(r"\s+", " ", unicodedata.normalize("NFKC", v or "")).strip()
 
 
 info = {}
