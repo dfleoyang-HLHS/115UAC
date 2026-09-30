@@ -237,7 +237,16 @@ for y in years_of("離原聯保_分發標準.csv"):
     jr_hist_report.append(f"{y} 離原聯保：{len(res)} 個校系，對應到 115 年 {hit} 個保送名額")
 print("\n".join(jr_hist_report))
 
-js = "window.JRACOIA=" + json.dumps(JR, ensure_ascii=False, separators=(",", ":")) + ";\n"
+# 醫事人員養成計畫（衛福部公費生）：最新學年度的校系名額；代碼自成一套
+MED = []
+med_years = years_of("醫事人員養成計畫_校系名額.csv")
+if med_years:
+    for x in csv.DictReader(open(HERE / f"{med_years[0]}醫事人員養成計畫_校系名額.csv", encoding="utf-8-sig")):
+        MED.append({"y": x["學年度"], "s": x["學校"], "d": x["學系"], "yr": x["修業年限"], "id": x["籍屬身分"],
+                    "c": x["校系代碼"], "q": x["招生名額"]})
+
+js = "window.MED=" + json.dumps(MED, ensure_ascii=False, separators=(",", ":")) + ";\n"
+js += "window.JRACOIA=" + json.dumps(JR, ensure_ascii=False, separators=(",", ":")) + ";\n"
 js += "window.HIST=" + json.dumps(HIST, ensure_ascii=False, separators=(",", ":")) + ";\n"
 js += "window.TECH=" + json.dumps(tech_out, ensure_ascii=False, separators=(",", ":")) + ";\n"
 js += "window.DIST=" + json.dumps(dist_out, ensure_ascii=False, separators=(",", ":")) + ";\n"
