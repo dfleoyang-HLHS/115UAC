@@ -110,7 +110,14 @@ tbody tr:last-child td{border-bottom:0}
 .jr-row:focus-visible{outline:2px solid var(--ind);outline-offset:-2px}
 .jr-need td{background:var(--bg);font-size:13px;line-height:1.7}
 .jr-tie{margin:0;padding-left:18px;font-size:13px}
+.jr-table{min-width:1080px}
 .jr-table td{font-size:13px}
+.jr-table td:nth-child(2){min-width:150px}
+.jr-hist{white-space:nowrap}
+.jr-y{line-height:1.9}
+.hchip{display:inline-block;padding:0 7px;border-radius:6px;border:1px solid var(--line);background:var(--bg);font-size:12px}
+.hchip.ok{background:var(--ind-soft);color:var(--ind);border-color:transparent}
+.hchip.warn{background:var(--warn-soft);color:var(--warn);border-color:transparent}
 footer{margin-top:44px;padding-top:16px;border-top:1px solid var(--line);font-size:13px;color:var(--muted)}
 @media (max-width:720px){
   header .site{order:3;width:100%;flex:none;font-size:14px}
@@ -287,16 +294,17 @@ footer{margin-top:44px;padding-top:16px;border-top:1px solid var(--line);font-si
       <span class="count" id="jr-count"></span>
     </div>
     <div class="tbl-wrap"><table class="jr-table">
-      <thead><tr><th>保送代碼</th><th>學校／學系</th><th id="jr-h-lang">族語別</th><th>保送縣市</th><th class="num">名額</th><th>學測檢定</th><th>採計方式</th><th>同分參酌（前 3 項）</th></tr></thead>
+      <thead><tr><th>保送代碼</th><th>學校／學系</th><th id="jr-h-lang">族語別</th><th>保送縣市</th><th class="num">名額</th><th>學測檢定</th><th>採計方式</th><th>同分參酌（前 3 項）</th><th>歷年分發最低標準</th></tr></thead>
       <tbody id="jr-body"></tbody>
     </table></div>
-    <p class="src">保送代碼為本管道專用（如 AAC01），與繁星推薦、申請入學、分發入學的校系代碼不同，因此不列入選擇庫與歷年錄取結果。點選各列可看需求專長與分發學校。資料來源：<a href="https://admissions.nutn.edu.tw/jracoia/pdf/Brochure115.pdf" target="_blank" rel="noopener">115 學年度離原聯保簡章<span class="ext" aria-hidden="true">↗</span></a>、<a href="https://admissions.nutn.edu.tw/jracoia/" target="_blank" rel="noopener">聯保會網站<span class="ext" aria-hidden="true">↗</span></a></p>
+    <p class="src">歷年分發最低標準取自大學甄選入學委員會統一分發結果：「正取」表示只分發到正取生、「備N」表示遞補到備取第 N 名、「無」表示沒有錄取生分發入學。每年需求名額不同，往年以相同族語別與縣市（保送代碼前 2 碼）、學校與學系對應，括號內為當年的保送代碼。</p>
+    <p class="src">保送代碼為本管道專用（如 AAC01），與繁星推薦、申請入學、分發入學的校系代碼不同，因此不列入選擇庫；歷年資料也另外以本表最右欄呈現。點選各列可看需求專長與分發學校。資料來源：<a href="https://admissions.nutn.edu.tw/jracoia/pdf/Brochure115.pdf" target="_blank" rel="noopener">115 學年度離原聯保簡章<span class="ext" aria-hidden="true">↗</span></a>、<a href="https://admissions.nutn.edu.tw/jracoia/" target="_blank" rel="noopener">聯保會網站<span class="ext" aria-hidden="true">↗</span></a></p>
   </section>
 
   <footer>外加名額資料取自 115 學年度大學甄選入學委員會校系分則與大學分發入學招生簡章；各項規定、名額與時程以當學年度官方簡章公告為準。</footer>
 </main>
 
-<script src="data.js?v=20261005"></script>
+<script src="data.js?v=20261006"></script>
 <script>
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
@@ -419,6 +427,17 @@ $("prog-list").innerHTML = Object.entries(bySchool).map(([s, list]) => `<div cla
 // ---------- 離原聯保（師資培育公費生保送甄試） ----------
 const JR = window.JRACOIA || [];
 let jrKind = "原住民";
+// 歷年分發最低標準：正取＝只分發正取生、備N＝遞補到備取第 N 名、無＝沒有錄取生分發入學
+function jrHist(r){
+  const h = r.h || {};
+  const ys = Object.keys(h).sort((a, b) => b - a);
+  if (!ys.length) return '<span class="note">尚無資料</span>';
+  return ys.map(y => h[y].map(x => {
+    const cls = x.s === "正取" ? "ok" : /^備/.test(x.s) ? "warn" : "";
+    const other = x.c !== r.c ? `<span class="note">（${esc(x.c)}）</span>` : "";
+    return `<div class="jr-y"><b>${y}</b> <span class="hchip ${cls}">${esc(x.s)}</span>${other}</div>`;
+  }).join("")).join("");
+}
 function renderJR(){
   const rows = JR.filter(r => r.k === jrKind);
   $("jr-count").textContent = `${rows.length} 個保送校系，名額合計 ${rows.reduce((a, r) => a + (+r.q || 0), 0)} 名`;
@@ -430,8 +449,9 @@ function renderJR(){
     return `<tr class="jr-row" tabindex="0"><td>${esc(r.c)}</td><td><b>${esc(r.s)}</b><br>${esc(r.d)}</td>
       <td>${jrKind === "原住民" ? `${esc(r.lang)}<br><span class="note">${esc(r.id)}</span>` : esc(r.id)}</td>
       <td>${esc(r.area)}</td><td class="num"><b>${esc(r.q)}</b></td><td>${esc(std)}</td><td>${w}</td>
-      <td><ol class="jr-tie">${r.tie.slice(0, 3).map(t => `<li>${esc(t)}</li>`).join("")}</ol></td></tr>
-      <tr class="jr-need" hidden><td colspan="8"><b>需求專長與分發：</b>${esc(r.need)}${r.tie.length > 3 ? `<br><b>同分參酌完整順序：</b>${r.tie.map((t, i) => `${i + 1}. ${esc(t)}`).join("　")}` : ""}</td></tr>`;
+      <td><ol class="jr-tie">${r.tie.slice(0, 3).map(t => `<li>${esc(t)}</li>`).join("")}</ol></td>
+      <td class="jr-hist">${jrHist(r)}</td></tr>
+      <tr class="jr-need" hidden><td colspan="9"><b>需求專長與分發：</b>${esc(r.need)}${r.tie.length > 3 ? `<br><b>同分參酌完整順序：</b>${r.tie.map((t, i) => `${i + 1}. ${esc(t)}`).join("　")}` : ""}</td></tr>`;
   }).join("");
 }
 function setJR(k){

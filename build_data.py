@@ -220,6 +220,23 @@ if jr_years:
                    "p": x["學測佔總成績比例"], "sk": x["術科採計"], "skp": x["術科佔總成績比例"],
                    "tie": [x[f"同分參酌{i}"] for i in range(1, 7) if x[f"同分參酌{i}"]], "need": x["需求專長與分發"]})
 
+# 離原聯保歷年分發最低標準（甄選委員會 teacher.html）：保送代碼每年會換系，
+# 以「代碼前 2 碼（族語＋縣市）＋學校＋學系」對應；同一學年度則直接比對代碼
+jr_hist_report = []
+for y in years_of("離原聯保_分發標準.csv"):
+    res = list(csv.DictReader(open(HERE / f"{y}離原聯保_分發標準.csv", encoding="utf-8-sig")))
+    hit = 0
+    for r in JR:
+        same_year = str(y) == r["y"]
+        m = [x for x in res if (x["保送代碼"] == r["c"]) if same_year] or \
+            [x for x in res if not same_year and x["保送代碼"][:2] == r["c"][:2]
+             and norm(x["學校"]) == norm(r["s"]) and norm(x["學系"]) == norm(r["d"])]
+        if m:
+            hit += 1
+            r.setdefault("h", {})[str(y)] = [{"c": x["保送代碼"], "n": x["學系(組)名稱"], "s": x["分發最低標準"]} for x in m]
+    jr_hist_report.append(f"{y} 離原聯保：{len(res)} 個校系，對應到 115 年 {hit} 個保送名額")
+print("\n".join(jr_hist_report))
+
 js = "window.JRACOIA=" + json.dumps(JR, ensure_ascii=False, separators=(",", ":")) + ";\n"
 js += "window.HIST=" + json.dumps(HIST, ensure_ascii=False, separators=(",", ":")) + ";\n"
 js += "window.TECH=" + json.dumps(tech_out, ensure_ascii=False, separators=(",", ":")) + ";\n"
