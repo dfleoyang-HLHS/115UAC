@@ -73,7 +73,7 @@ for d in a.execute("SELECT * FROM departments ORDER BY code"):
         "p1": d["stage1_overall_pct"], "it": items.get(d["code"], []),
         "sk": d["skill_test_required"] == "是", "apcs": "；".join(apcs.get(d["code"], [])),
         "date": (d["exam_date"] or "").replace("; ", ""), "fee": d["interview_fee"],
-        "tie": tie.get(d["code"], []),
+        "tie": tie.get(d["code"], []), "ind": d["indigenous_extra_quota"],
     })
 
 # ---------- 分發入學（115 學年度簡章 CSV） ----------

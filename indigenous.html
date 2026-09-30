@@ -1,0 +1,352 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<title>原住民族學生升學專區</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@700&display=swap">
+<style>
+/* 版面：與主網頁同一套色票；單欄閱讀＋查詢表。專區主色取山林綠，搭配主網頁的准考證藍 */
+:root{
+  --bg:#f5f6f8; --card:#ffffff; --ink:#1b2331; --muted:#5f6b7d; --line:#e1e5eb;
+  --accent:#1f4fb8; --accent-soft:#e7edfa;
+  --ind:#256b57; --ind-soft:#e2f1ec; --warn:#855600; --warn-soft:#fdf3d8;
+  --on-accent:#ffffff;
+  --font-body:"Noto Sans TC","Microsoft JhengHei","PingFang TC",system-ui,sans-serif;
+  --font-display:"Noto Serif TC","Noto Sans TC","PMingLiU",serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#11151c; --card:#1a2029; --ink:#e6eaf0; --muted:#9aa5b5; --line:#2b3340;
+  --accent:#86a8ff; --accent-soft:#1e2a45;
+  --ind:#6fd0b0; --ind-soft:#16322a; --warn:#f2c86b; --warn-soft:#3a2f14;
+  --on-accent:#0d1422; color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --bg:#11151c; --card:#1a2029; --ink:#e6eaf0; --muted:#9aa5b5; --line:#2b3340;
+  --accent:#86a8ff; --accent-soft:#1e2a45;
+  --ind:#6fd0b0; --ind-soft:#16322a; --warn:#f2c86b; --warn-soft:#3a2f14;
+  --on-accent:#0d1422; color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.7 var(--font-body)}
+h1,h2,h3{font-family:var(--font-display);text-wrap:balance}
+a{color:var(--accent)}
+a:focus-visible,button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+header{background:var(--card);border-bottom:1px solid var(--line);padding:12px 16px}
+.wrap{max-width:1040px;margin:0 auto}
+header .wrap{display:flex;align-items:center;gap:10px 14px;flex-wrap:wrap}
+.back{color:var(--muted);text-decoration:none;font-size:14px}
+.back:hover{color:var(--accent)}
+header .site{font-family:var(--font-display);font-weight:700;font-size:16px;flex:1;min-width:0}
+.theme-btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:99px;padding:4px 12px;font:inherit;font-size:13px;cursor:pointer}
+.theme-ico{width:14px;height:14px;border-radius:50%;background:var(--ink);box-shadow:inset -5px -2px 0 0 var(--bg)}
+:root[data-theme="dark"] .theme-ico{background:var(--warn);box-shadow:0 0 0 3px var(--warn-soft)}
+main{padding:0 16px 64px}
+.hero{padding:40px 0 26px;display:flex;flex-direction:column;gap:10px;border-bottom:1px solid var(--line)}
+.kicker{margin:0;font-size:13px;letter-spacing:.12em;color:var(--ind);font-weight:500}
+.hero h1{margin:0;font-size:clamp(28px,5vw,42px);line-height:1.25;letter-spacing:.04em}
+.lead{margin:0;max-width:62ch;color:var(--muted);font-size:16px}
+.toc{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.toc a{font-size:14px;text-decoration:none;padding:4px 12px;border-radius:99px;background:var(--ind-soft);color:var(--ind)}
+.toc a:hover{text-decoration:underline}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-top:22px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+.stat b{display:block;font-size:26px;font-variant-numeric:tabular-nums;color:var(--ind);line-height:1.2}
+.stat span{font-size:13px;color:var(--muted)}
+section.block{padding-top:36px;display:flex;flex-direction:column;gap:14px}
+section.block > h2{margin:0;font-size:24px;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+section.block > h2 small{font-family:var(--font-body);font-size:13px;font-weight:400;color:var(--muted)}
+.intro{margin:0;max-width:66ch;color:var(--muted)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px 20px;min-width:0}
+.rules{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px}
+.rule h3{margin:0 0 6px;font-size:17px;color:var(--ind)}
+.rule p{margin:0;font-size:14px}
+.rule .big{font-family:var(--font-display);font-size:30px;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums;line-height:1.2;margin:2px 0 6px}
+.notes{margin:0;padding-left:20px;font-size:14px;display:flex;flex-direction:column;gap:4px}
+.src{font-size:13px;color:var(--muted);margin:0}
+.src a{word-break:break-all}
+.tool-bar{display:flex;flex-wrap:wrap;gap:10px;align-items:end}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.seg button{border:0;background:var(--card);color:var(--muted);padding:7px 14px;font:inherit;font-size:14px;cursor:pointer}
+.seg button.on{background:var(--ind);color:var(--on-accent);font-weight:500}
+.field{display:flex;flex-direction:column;gap:3px;min-width:0}
+.field label{font-size:12px;color:var(--muted)}
+.field input,.field select{padding:7px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);font:inherit;font-size:14px}
+.count{font-size:14px;color:var(--muted)}
+.count b{color:var(--ink);font-size:18px;font-variant-numeric:tabular-nums}
+.tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:var(--card)}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{padding:8px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+thead th{background:var(--bg);color:var(--muted);font-weight:500;font-size:13px;white-space:nowrap}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+td.num b{color:var(--ind)}
+tbody tr:last-child td{border-bottom:0}
+.more-btn{align-self:center;padding:7px 16px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--ink);font:inherit;font-size:14px;cursor:pointer}
+.programs{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px}
+.prog h3{margin:0 0 8px;font-size:16px}
+.prog ul{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:6px;font-size:14px}
+.prog li a{text-decoration:none}
+.prog li a:hover{text-decoration:underline}
+.ext{font-size:11px;margin-left:3px}
+.med{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:14px}
+.facts{margin:0;display:grid;grid-template-columns:auto 1fr;gap:6px 14px;font-size:14px}
+.facts dt{color:var(--muted);white-space:nowrap}
+.facts dd{margin:0}
+.steps{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.steps li{display:grid;grid-template-columns:96px 1fr;gap:12px;padding:8px 0;border-bottom:1px dashed var(--line);font-size:14px}
+.steps li:last-child{border-bottom:0}
+.steps time{font-variant-numeric:tabular-nums;color:var(--ind);font-weight:700}
+.linkrow{display:flex;flex-wrap:wrap;gap:8px}
+.linkrow a{font-size:14px;text-decoration:none;border:1px solid var(--line);border-radius:8px;padding:5px 12px;background:var(--card)}
+.linkrow a:hover{border-color:var(--accent);text-decoration:underline}
+.warn-box{background:var(--warn-soft);color:var(--warn);border-radius:10px;padding:10px 14px;font-size:14px}
+footer{margin-top:44px;padding-top:16px;border-top:1px solid var(--line);font-size:13px;color:var(--muted)}
+@media (max-width:720px){
+  .med{grid-template-columns:1fr}
+  .steps li{grid-template-columns:80px 1fr}
+  .facts{grid-template-columns:1fr;gap:0}
+  .facts dd{margin-bottom:8px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+  <a class="back" href="index.html">← 回首頁</a>
+  <span class="site">台灣高中學生升大學進路校系分析</span>
+  <button class="theme-btn" id="theme-btn" type="button"><span class="theme-ico" aria-hidden="true"></span><span id="theme-label">夜間</span></button>
+</div></header>
+
+<main class="wrap">
+  <div class="hero">
+    <p class="kicker">115 學年度 · 原住民族學生</p>
+    <h1>原住民族學生升學專區</h1>
+    <p class="lead">整理原住民學生升大學可以運用的升學保障、各管道的原住民外加名額、大學原住民專班，以及衛福部「原住民族及離島地區醫事人員養成計畫」公費生管道。</p>
+    <nav class="toc" aria-label="本頁目錄">
+      <a href="#rules">升學保障</a><a href="#quota">外加名額查詢</a><a href="#programs">原住民專班</a><a href="#medical">醫事人員養成計畫</a><a href="#links">相關資源</a>
+    </nav>
+    <div class="stats">
+      <div class="stat"><b id="st-apply">—</b><span>個人申請原住民外加名額（<span id="st-apply-n">—</span> 個校系）</span></div>
+      <div class="stat"><b id="st-dist">—</b><span>分發入學原民外加名額（<span id="st-dist-n">—</span> 個學系）</span></div>
+      <div class="stat"><b>22</b><span>學士班原住民專班（教育部原力網）</span></div>
+      <div class="stat"><b>117</b><span>115 學年度醫事人員養成計畫公費生名額</span></div>
+    </div>
+  </div>
+
+  <section class="block" id="rules">
+    <h2>升學保障 <small>原住民學生升學保障及原住民公費留學辦法</small></h2>
+    <p class="intro">參加大學入學（不含碩士班、博士班、學士後各學系）時，具原住民身分的學生可同時享有加分優待與外加名額。</p>
+    <div class="rules">
+      <div class="card rule">
+        <h3>加分優待</h3>
+        <p class="big">＋10%</p>
+        <p>考試入學依採計科目成績加總分 10%；參加免試入學則為超額比序總積分加 10%。</p>
+      </div>
+      <div class="card rule">
+        <h3>取得文化及語言能力證明</h3>
+        <p class="big">＋35%</p>
+        <p>取得原住民族文化及語言能力證明（族語認證）者，加分提高為 35%。</p>
+      </div>
+      <div class="card rule">
+        <h3>外加名額</h3>
+        <p class="big">2%</p>
+        <p>以各校系原核定招生名額外加 2% 計算，以外加名額錄取，不占一般生名額。</p>
+      </div>
+    </div>
+    <div class="card">
+      <ul class="notes">
+        <li>原住民身分依原住民族委員會規定認定，招生單位透過教育部電子查驗系統查核戶籍資料。</li>
+        <li>報名時未以原住民身分報名或未繳證件者不予優待，事後不得補辦。</li>
+        <li>依本辦法入學後再轉校、轉系者，不得再享有優待。</li>
+        <li>各管道實際的加分計算方式與外加名額，以當學年度招生簡章為準。</li>
+      </ul>
+    </div>
+    <p class="src">法規來源：<a href="https://law.moj.gov.tw/LawClass/LawAll.aspx?pcode=H0020031" target="_blank" rel="noopener">全國法規資料庫－原住民學生升學保障及原住民公費留學辦法（108.12.18 修正）<span class="ext" aria-hidden="true">↗</span></a></p>
+  </section>
+
+  <section class="block" id="quota">
+    <h2>原住民外加名額查詢 <small>115 學年度校系分則</small></h2>
+    <p class="intro">個人申請與分發入學的校系分則都列有原住民外加名額。選擇管道後，可用學校或關鍵字篩選，並依名額排序。法規的 2% 是計算基準，部分校系會自訂較多的原住民外加名額（例如東吳大學法律學系個人申請為 22 名），一律以校系分則公告為準。</p>
+    <div class="tool-bar">
+      <div class="seg" role="tablist" aria-label="入學管道">
+        <button type="button" id="q-apply" class="on" role="tab" aria-selected="true">個人申請</button>
+        <button type="button" id="q-dist" role="tab" aria-selected="false">分發入學</button>
+      </div>
+      <div class="field"><label for="q-kw">關鍵字</label><input id="q-kw" placeholder="例如 護理、社工"></div>
+      <div class="field"><label for="q-sch">學校</label><select id="q-sch"></select></div>
+      <div class="field"><label for="q-sort">排序</label><select id="q-sort">
+        <option value="">依校系代碼</option><option value="desc">外加名額：多 → 少</option>
+      </select></div>
+      <label class="count" style="display:flex;gap:6px;align-items:center"><input type="checkbox" id="q-only"> 只列有外加名額的校系</label>
+    </div>
+    <p class="count" id="q-count"></p>
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>校系代碼</th><th>學校</th><th>校系</th><th class="num">一般名額</th><th class="num">原住民外加</th></tr></thead>
+      <tbody id="q-body"></tbody>
+    </table></div>
+    <button class="more-btn" id="q-more" type="button" hidden>顯示更多</button>
+    <p class="src">完整的學測檢定、篩選倍率與採計科目，請到首頁的<a href="index.html#apply">個人申請</a>或<a href="index.html#dist">分發入學</a>查詢。</p>
+  </section>
+
+  <section class="block" id="programs">
+    <h2>大學原住民專班 <small>學士班，單獨招生</small></h2>
+    <p class="intro">原住民專班只招收具原住民身分的學生，多數由各校<strong>單獨招生</strong>，不在繁星推薦、申請入學的聯合招生系統裡。報名時間、考科與名額依各校簡章公告，多集中在高三上學期末到下學期。</p>
+    <div class="programs" id="prog-list"></div>
+    <p class="src">名單來源：<a href="https://indigenous.moe.gov.tw/aboriginal" target="_blank" rel="noopener">教育部原力網－原住民專班<span class="ext" aria-hidden="true">↗</span></a>（依學制篩選「學士班」，資料更新至 2026.05.21）。專班每年可能增減，報名前請以學校公告為準。</p>
+  </section>
+
+  <section class="block" id="medical">
+    <h2>原住民族及離島地區醫事人員養成計畫 <small>衛生福利部公費生（第 5 期）</small></h2>
+    <p class="intro">衛福部為原住民族及離島地區培育在地醫事人員的公費生甄試，錄取後依計畫分發就讀醫學系、護理學系等，畢業後回到原鄉或離島服務。以下為 115 學年度公告內容，新學年度請留意衛福部公告。</p>
+    <div class="med">
+      <div class="card">
+        <dl class="facts">
+          <dt>報名資格</dt><dd>原住民籍、離島籍（澎湖縣、金門縣、連江縣、臺東縣蘭嶼鄉及綠島鄉、屏東縣琉球鄉）與偏鄉籍考生</dd>
+          <dt>招生名額</dt><dd>115 學年度共 117 名，名額依學系分列如下表</dd>
+          <dt>修業年限</dt><dd>4～6 年，依各學系規定</dd>
+          <dt>服務義務</dt><dd>服務年限與修業年限相同；醫學系為 10 年</dd>
+          <dt>承辦學校</dt><dd>高雄醫學大學（網路報名、面試作業）</dd>
+        </dl>
+      </div>
+      <div class="card">
+        <ol class="steps" aria-label="115 學年度時程">
+          <li><time>2/25～3/11</time><span>網路報名（3/11 下午 5 時截止）</span></li>
+          <li><time>3/20</time><span>網路公告合於面試名單</span></li>
+          <li><time>4/12</time><span>面試</span></li>
+          <li><time>4/27</time><span>開放網路查詢成績</span></li>
+          <li><time>5/14</time><span>公告各校系錄取正、備取生名單</span></li>
+        </ol>
+      </div>
+    </div>
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>學系</th><th class="num">115 學年度名額</th><th>學系</th><th class="num">115 學年度名額</th></tr></thead>
+      <tbody id="med-body"></tbody>
+    </table></div>
+    <div class="linkrow">
+      <a href="https://mohw.gov.tw/cp-16-85259-1.html" target="_blank" rel="noopener">衛福部公告：115 學年度在地養成計畫公費生招生簡章<span class="ext" aria-hidden="true">↗</span></a>
+      <a href="https://enr.kmu.edu.tw" target="_blank" rel="noopener">高雄醫學大學招生入學資訊網（簡章下載、報名）<span class="ext" aria-hidden="true">↗</span></a>
+    </div>
+  </section>
+
+  <section class="block" id="links">
+    <h2>相關資源</h2>
+    <div class="linkrow">
+      <a href="https://indigenous.moe.gov.tw/aboriginal" target="_blank" rel="noopener">教育部原力網（原住民專班）<span class="ext" aria-hidden="true">↗</span></a>
+      <a href="https://www.cip.gov.tw/" target="_blank" rel="noopener">原住民族委員會<span class="ext" aria-hidden="true">↗</span></a>
+      <a href="https://www.ilrdf.org.tw/" target="_blank" rel="noopener">原住民族語言研究發展基金會（族語認證）<span class="ext" aria-hidden="true">↗</span></a>
+      <a href="https://law.moj.gov.tw/LawClass/LawAll.aspx?pcode=H0020031" target="_blank" rel="noopener">原住民學生升學保障及原住民公費留學辦法<span class="ext" aria-hidden="true">↗</span></a>
+      <a href="https://www.cac.edu.tw/" target="_blank" rel="noopener">大學甄選入學委員會<span class="ext" aria-hidden="true">↗</span></a>
+      <a href="https://www.uac.edu.tw/" target="_blank" rel="noopener">大學考試入學分發委員會<span class="ext" aria-hidden="true">↗</span></a>
+    </div>
+  </section>
+
+  <footer>外加名額資料取自 115 學年度大學甄選入學委員會校系分則與大學分發入學招生簡章；各項規定、名額與時程以當學年度官方簡章公告為準。</footer>
+</main>
+
+<script src="data.js?v=20260930b"></script>
+<script>
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const store = {
+  get(k){ try { return JSON.parse(localStorage.getItem(k)); } catch(e){ return null; } },
+  set(k,v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch(e){} }
+};
+
+// ---------- 白天／夜間（與主網頁共用設定） ----------
+function currentTheme(){
+  const t = document.documentElement.dataset.theme;
+  if (t === "light" || t === "dark") return t;
+  return window.matchMedia && matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+}
+function applyTheme(t, explicit){
+  if (explicit) document.documentElement.dataset.theme = t;
+  $("theme-label").textContent = t === "dark" ? "白天" : "夜間";
+  $("theme-btn").setAttribute("aria-label", t === "dark" ? "切換為白天模式" : "切換為夜間模式");
+}
+(function(){
+  const saved = store.get("theme");
+  if (saved === "light" || saved === "dark") applyTheme(saved, true); else applyTheme(currentTheme(), false);
+  $("theme-btn").addEventListener("click", () => { const n = currentTheme() === "dark" ? "light" : "dark"; applyTheme(n, true); store.set("theme", n); });
+})();
+
+// ---------- 原住民外加名額 ----------
+const num = v => /^\d+$/.test(String(v ?? "")) ? +v : 0;
+const CH = {
+  apply: (window.APPLY || []).map(r => ({c: r.c, s: r.s, d: r.d, q: r.q, ind: num(r.ind)})),
+  dist: (window.DIST || []).map(r => ({c: r.c, s: r.s, d: r.d, q: r.q, ind: num(r.ind)})),
+};
+const sum = a => a.reduce((n, r) => n + r.ind, 0);
+$("st-apply").textContent = sum(CH.apply).toLocaleString();
+$("st-apply-n").textContent = CH.apply.filter(r => r.ind).length.toLocaleString();
+$("st-dist").textContent = sum(CH.dist).toLocaleString();
+$("st-dist-n").textContent = CH.dist.filter(r => r.ind).length.toLocaleString();
+
+let ch = "apply", shown = 50;
+function fillSchools(){
+  const schools = [...new Set(CH[ch].map(r => r.s))];
+  $("q-sch").innerHTML = '<option value="">全部學校</option>' + schools.map(s => `<option>${esc(s)}</option>`).join("");
+}
+function renderQuota(reset = true){
+  if (reset) shown = 50;
+  const kw = $("q-kw").value.trim(), sch = $("q-sch").value, only = $("q-only").checked;
+  let rows = CH[ch].filter(r => (!sch || r.s === sch) && (!kw || (r.s + r.d + r.c).includes(kw)) && (!only || r.ind));
+  if ($("q-sort").value === "desc") rows = [...rows].sort((a, b) => b.ind - a.ind || a.c.localeCompare(b.c));
+  $("q-count").innerHTML = `共 <b>${rows.length.toLocaleString()}</b> 個${ch === "apply" ? "校系" : "學系"}，原住民外加名額合計 <b>${sum(rows).toLocaleString()}</b> 名`;
+  $("q-body").innerHTML = rows.slice(0, shown).map(r => `<tr><td>${esc(r.c)}</td><td>${esc(r.s)}</td><td>${esc(r.d)}</td><td class="num">${esc(r.q)}</td><td class="num">${r.ind ? `<b>${r.ind}</b>` : "無"}</td></tr>`).join("")
+    || '<tr><td colspan="5">沒有符合條件的校系。</td></tr>';
+  $("q-more").hidden = rows.length <= shown;
+  $("q-more").textContent = `顯示更多（還有 ${rows.length - shown} 筆）`;
+}
+function setCh(c){
+  ch = c;
+  ["apply", "dist"].forEach(k => { $("q-" + k).classList.toggle("on", k === c); $("q-" + k).setAttribute("aria-selected", k === c); });
+  fillSchools(); renderQuota();
+}
+$("q-apply").addEventListener("click", () => setCh("apply"));
+$("q-dist").addEventListener("click", () => setCh("dist"));
+["q-kw", "q-sch", "q-sort", "q-only"].forEach(id => $(id).addEventListener("input", () => renderQuota()));
+$("q-more").addEventListener("click", () => { shown += 50; renderQuota(false); });
+$("q-only").checked = true;
+setCh("apply");
+
+// ---------- 原住民專班（教育部原力網，學士班） ----------
+const PROGRAMS = [
+  ["國立高雄師範大學", "藝術產業學士原住民專班", "https://c.nknu.edu.tw/iu/"],
+  ["國立高雄師範大學", "語言與文化學士原住民專班", "https://c.nknu.edu.tw/uo/"],
+  ["國立高雄師範大學", "運動競技與產業學士原住民專班", "https://c.nknu.edu.tw/tsi/default.aspx"],
+  ["國立暨南國際大學", "高齡健康與長期照顧管理學士學位學程原住民族專班", "https://ltc.ncnu.edu.tw/"],
+  ["國立暨南國際大學", "原住民文化產業與社會工作學士學位學程原住民族專班", "https://indigenous.ncnu.edu.tw/"],
+  ["國立暨南國際大學", "護理學系原住民族專班", "https://exam.ncnu.edu.tw/6AboClass.html"],
+  ["國立屏東大學", "文化發展學士學位學程原住民專班", "https://indigenous.nptu.edu.tw/index.php"],
+  ["中原大學", "設計學院設計學士原住民專班", "https://indigenous.moe.gov.tw/aboriginal"],
+  ["世新大學", "新聞傳播學院全媒體原住民專班", "https://cjc.shu.edu.tw/%E5%85%A8%E5%AA%92%E9%AB%94%E5%8E%9F%E4%BD%8F%E6%B0%91%E5%B0%88%E7%8F%AD/"],
+  ["國立中山大學", "國際跨領域學士學位學程原住民專班", "https://iii.nsysu.edu.tw/app/home.php"],
+  ["國立宜蘭大學", "生物資源學院原住民專班", "https://piecb.niu.edu.tw/"],
+  ["國立東華大學", "法律系原住民專班", "https://law.ndhu.edu.tw/p/412-1115-19958.php?Lang=zh-tw"],
+  ["國立彰化師範大學", "高齡健康促進與照護管理原住民專班", "https://coe.ncue.edu.tw/p/412-1033-1648.php?Lang=zh-tw"],
+  ["國立臺東大學", "高齡健康與照護管理原住民專班", "https://shcm.nttu.edu.tw/"],
+  ["國立臺東大學", "幼兒教育學系原住民專班", "https://ndcde.nttu.edu.tw/p/412-1036-9222.php?Lang=zh-tw"],
+  ["國立聯合大學", "原住民學士學位學程專班", "https://indigenous.nuu.edu.tw/"],
+  ["國立體育大學", "體育學院體育推廣原住民專班", "https://ipsp.ntsu.edu.tw/"],
+  ["國立體育大學", "競技運動原住民專班", "https://ists.ntsu.edu.tw/"],
+  ["靜宜大學", "犯罪防治學士學位學程原住民專班", "https://cpis.pu.edu.tw/"],
+  ["靜宜大學", "健康照護社會工作學士學位學程原住民專班", "https://hcsw.pu.edu.tw/"],
+  ["嶺東科技大學", "財務金融系（原住民專班）", "https://fin.ltu.edu.tw/"],
+  ["嶺東科技大學", "流行設計系（原住民專班）", "https://fsd.ltu.edu.tw/"],
+];
+const bySchool = {};
+PROGRAMS.forEach(([s, n, u]) => (bySchool[s] ||= []).push([n, u]));
+$("prog-list").innerHTML = Object.entries(bySchool).map(([s, list]) => `<div class="card prog"><h3>${esc(s)}</h3><ul>${
+  list.map(([n, u]) => `<li><a href="${esc(u)}" target="_blank" rel="noopener">${esc(n)}<span class="ext" aria-hidden="true">↗</span></a></li>`).join("")}</ul></div>`).join("");
+
+// ---------- 醫事人員養成計畫名額（115 學年度） ----------
+const MED = [["醫學系", 33], ["牙醫學系", 6], ["護理學系", 52], ["藥學系", 11], ["醫學生物技術暨檢驗學系", 3], ["生物醫學影像暨放射科學學系", 2],
+  ["物理治療學系", 3], ["職能治療學系", 2], ["臨床心理學系", 1], ["語言治療學系", 2], ["營養學系", 1], ["呼吸治療學系", 1]];
+const half = Math.ceil(MED.length / 2);
+$("med-body").innerHTML = MED.slice(0, half).map((m, i) => {
+  const n = MED[i + half];
+  return `<tr><td>${m[0]}</td><td class="num"><b>${m[1]}</b></td><td>${n ? n[0] : ""}</td><td class="num">${n ? `<b>${n[1]}</b>` : ""}</td></tr>`;
+}).join("") + `<tr><td colspan="3"><b>合計</b></td><td class="num"><b>${MED.reduce((a, m) => a + m[1], 0)}</b></td></tr>`;
+</script>
+</body>
+</html>

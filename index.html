@@ -51,6 +51,8 @@ main{padding:20px 16px 60px}
 .hero-title{margin:0;font-family:var(--font-display);font-weight:700;font-size:clamp(28px,5vw,44px);line-height:1.25;letter-spacing:.04em;color:var(--ink);text-wrap:balance}
 .hero-br{display:none}
 .hero-lead{margin:4px 0 0;font-size:clamp(17px,2.4vw,21px);font-weight:500;color:var(--accent)}
+.hero-ind{font-size:14px;text-decoration:none;padding:5px 14px;border-radius:99px;background:var(--ok-soft);color:var(--ok)}
+.hero-ind:hover{text-decoration:underline}
 .hero-src{margin:6px 0 0;max-width:68ch;font-size:13px;line-height:1.7;color:var(--muted)}
 @media (max-width:600px){.hero-br{display:inline}}
 .entries{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px;margin-top:22px}
@@ -151,6 +153,7 @@ nav a .badge{display:inline-block;min-width:20px;padding:0 6px;margin-left:4px;b
 .step-card dd{margin:0;min-width:0}
 .go{display:inline-block;margin-top:12px;padding:5px 12px;border-radius:8px;background:var(--cs);color:var(--c);text-decoration:none;font-size:14px;font-weight:500}
 .go:hover{text-decoration:underline}
+.go-ind{--c:var(--ok);--cs:var(--ok-soft);align-self:flex-start;margin:auto 0 0}
 .go-tech{--c:var(--tech);--cs:var(--tech-soft);align-self:flex-start;margin:0 0 12px}
 .go:focus-visible{outline:2px solid var(--c);outline-offset:2px}
 .extra-routes{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
@@ -186,7 +189,7 @@ nav a .badge{display:inline-block;min-width:20px;padding:0 6px;margin-left:4px;b
 <body>
 <header><div class="wrap">
   <h1 onclick="go('')">115 學測五標志願篩選</h1>
-  <nav><a href="#star" id="nav-star">繁星推薦</a><a href="#apply" id="nav-apply">個人申請</a><a href="#dist" id="nav-dist">分發入學</a><a href="#tech" id="nav-tech">四技申請</a><a href="#compare" id="nav-compare">選擇庫<span class="badge" id="pin-count">0</span></a></nav>
+  <nav><a href="#star" id="nav-star">繁星推薦</a><a href="#apply" id="nav-apply">個人申請</a><a href="#dist" id="nav-dist">分發入學</a><a href="#tech" id="nav-tech">四技申請</a><a href="indigenous.html" id="nav-ind">原民專區</a><a href="#compare" id="nav-compare">選擇庫<span class="badge" id="pin-count">0</span></a></nav>
   <button class="theme-btn" id="theme-btn" type="button" aria-label="切換白天／夜間模式"><span class="theme-ico" aria-hidden="true"></span><span id="theme-label">夜間</span></button>
 </div></header>
 
@@ -197,6 +200,7 @@ nav a .badge{display:inline-block;min-width:20px;padding:0 6px;margin-left:4px;b
       <p class="hero-kicker">115 學年度 · 繁星推薦 · 個人申請 · 分發入學 · 四技申請</p>
       <h2 class="hero-title">台灣高中學生升大學<br class="hero-br">進路校系分析</h2>
       <p class="hero-lead">輸入學測成績，找出符合檢定標準的校系</p>
+      <a class="hero-ind" href="indigenous.html">原住民族學生升學專區：升學保障、原住民專班、醫事人員養成計畫 →</a>
       <p class="hero-src">資料來源：大學甄選入學委員會 115 學年度校系分則、115 學年度大學分發入學招生簡章、115 學年度四技申請入學招生資料；五標採 115 學年度學測成績標準</p>
     </div>
     <div class="entries">
@@ -294,6 +298,12 @@ nav a .badge{display:inline-block;min-width:20px;padding:0 6px;margin-left:4px;b
             <div class="links"><span class="links-t">官方網站</span><a href="https://lulu.ntus.edu.tw/" target="_blank" rel="noopener">中等以上學校運動績優學生升學輔導網<span class="ext" aria-hidden="true">↗</span></a></div>
         </article>
         <article class="xroute">
+          <h4>原住民族學生升學</h4>
+          <p class="xtag">升學保障、原住民專班、醫事人員養成計畫</p>
+          <p>原住民學生參加大學入學可享加分優待（10%，取得族語認證者 35%）與 2% 外加名額；另有各校原住民專班單獨招生，以及衛福部「原住民族及離島地區醫事人員養成計畫」公費生甄試。</p>
+          <a class="go go-ind" href="indigenous.html">進入原住民族學生升學專區 →</a>
+        </article>
+        <article class="xroute">
           <h4>青年儲蓄帳戶</h4>
           <p class="xtag">青年教育與就業儲蓄帳戶方案</p>
           <p>參加方案並完成職場或體驗學習 2～3 年者，可透過專案管道免考學測（採體驗報告與面試），申請一般大學或科技大學。</p>
@@ -321,6 +331,13 @@ nav a .badge{display:inline-block;min-width:20px;padding:0 6px;margin-left:4px;b
         <div class="field"><label>關鍵字（學校／校系）</label><input id="kw" placeholder="例如 資訊、臺灣大學"></div>
         <div class="field"><label id="grp-label">學群類別</label><select id="grp"><option value="">全部</option></select></div>
         <div class="field"><label>學校</label><select id="sch"><option value="">全部學校</option></select></div>
+        <div class="field hidden" id="sort-field"><label for="sort">排序</label><select id="sort">
+          <option value="">預設（依志願代碼）</option>
+          <option value="avg-desc">學測加權平均：高 → 低</option>
+          <option value="avg-asc">學測加權平均：低 → 高</option>
+          <option value="quota-desc">招生名額：多 → 少</option>
+          <option value="ratio-desc">複試錄取機會：預計複試人數 ÷ 招生名額 高 → 低</option>
+        </select></div>
       </div>
       <div class="checks">
         <label><input type="checkbox" id="show-all"> 同時顯示未符合的校系</label>
@@ -351,7 +368,7 @@ nav a .badge{display:inline-block;min-width:20px;padding:0 6px;margin-left:4px;b
   </section>
 </main>
 
-<script src="data.js?v=20260930"></script>
+<script src="data.js?v=20260930b"></script>
 <script>
 const SUBJ = ["國文","英文","數學A","數學B","社會","自然"];
 const LEVELS = ["頂標","前標","均標","後標","底標"];
@@ -671,6 +688,19 @@ function refresh(resetPage = true){
   $("count").textContent = okCount.toLocaleString();
   $("count-note").textContent = `個校系符合條件${showAll ? `（共列出 ${out.length} 筆）` : ""}` +
     (mode === "dist" && needAll && !ast.length ? "　← 請先勾選分科測驗應考科目（每個學系都至少採計 1 科分科）" : "");
+  // 四技申請排序：沒有加權平均（缺考科）的系組一律排在最後
+  const sortBy = mode === "tech" ? $("sort").value : "";
+  if (sortBy){
+    const key = ([r, res]) => sortBy.startsWith("avg") ? res.avg : sortBy === "quota-desc" ? +r.q : (+r.ex) / (+r.q || 1);
+    const dir = sortBy.endsWith("asc") ? 1 : -1;
+    out.sort((a, b) => {
+      const ka = key(a), kb = key(b);
+      if (ka == null && kb == null) return 0;
+      if (ka == null) return 1;
+      if (kb == null) return -1;
+      return (ka - kb) * dir || a[0].c.localeCompare(b[0].c);
+    });
+  }
   const slice = out.slice(0, shown);
   $("list").innerHTML = slice.map(([r,res]) => mode === "star" ? renderStar(r, res) : mode === "apply" ? renderApply(r, res, sc) : mode === "tech" ? renderTech(r, res) : renderDist(r, res)).join("")
     || '<div class="card note">沒有符合條件的校系，試著調整篩選條件。</div>';
@@ -706,6 +736,7 @@ function route(){
     dist: "分發入學｜輸入學測成績與分科測驗應考科目", tech: "四技申請｜輸入學測成績"}[mode];
   $("rank-field").classList.toggle("hidden", mode !== "star");
   $("apcs-wrap").classList.toggle("hidden", mode !== "apply" && mode !== "tech");
+  $("sort-field").classList.toggle("hidden", mode !== "tech");
   $("apcs-label").textContent = mode === "tech" ? "排除採計 APCS 超額篩選的系組" : "排除需 APCS 的校系";
   $("dist-field").classList.toggle("hidden", mode !== "dist");
   $("grp").parentElement.classList.toggle("hidden", mode === "dist");
@@ -897,7 +928,7 @@ function applyTheme(t, explicit){
 
 buildScoreInputs();
 updatePinCount();
-["kw","grp","sch","show-all","hide-skill","hide-apcs","need-all"].forEach(id => $(id).addEventListener("input", () => refresh()));
+["kw","grp","sch","sort","show-all","hide-skill","hide-apcs","need-all"].forEach(id => $(id).addEventListener("input", () => refresh()));
 $("rank").addEventListener("input", () => { saveScores(); refresh(); });
 $("reset").addEventListener("click", () => {
   document.querySelectorAll("[data-subj]").forEach(el => el.value = "");
