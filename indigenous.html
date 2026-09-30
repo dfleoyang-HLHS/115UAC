@@ -38,6 +38,11 @@ header .wrap{display:flex;align-items:center;gap:10px 14px;flex-wrap:wrap}
 .back{color:var(--muted);text-decoration:none;font-size:14px}
 .back:hover{color:var(--accent)}
 header .site{font-family:var(--font-display);font-weight:700;font-size:16px;flex:1;min-width:0}
+.pinlink{color:var(--ink);text-decoration:none;font-size:14px;padding:4px 10px;border-radius:8px}
+.pinlink:hover{background:var(--accent-soft);color:var(--accent)}
+.badge{display:inline-block;min-width:20px;padding:0 6px;margin-left:4px;border-radius:99px;background:var(--warn);color:var(--on-accent);font-size:12px;text-align:center;font-variant-numeric:tabular-nums}
+.pin{border:1px solid var(--line);background:var(--card);color:var(--muted);border-radius:99px;padding:2px 10px;font:inherit;font-size:12px;cursor:pointer;white-space:nowrap}
+.pin.on{background:var(--warn-soft);border-color:transparent;color:var(--warn);font-weight:600}
 .theme-btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:99px;padding:4px 12px;font:inherit;font-size:13px;cursor:pointer}
 .theme-ico{width:14px;height:14px;border-radius:50%;background:var(--ink);box-shadow:inset -5px -2px 0 0 var(--bg)}
 :root[data-theme="dark"] .theme-ico{background:var(--warn);box-shadow:0 0 0 3px var(--warn-soft)}
@@ -102,6 +107,7 @@ tbody tr:last-child td{border-bottom:0}
 .warn-box{background:var(--warn-soft);color:var(--warn);border-radius:10px;padding:10px 14px;font-size:14px}
 footer{margin-top:44px;padding-top:16px;border-top:1px solid var(--line);font-size:13px;color:var(--muted)}
 @media (max-width:720px){
+  header .site{order:3;width:100%;flex:none;font-size:14px}
   .med{grid-template-columns:1fr}
   .steps li{grid-template-columns:80px 1fr}
   .facts{grid-template-columns:1fr;gap:0}
@@ -114,6 +120,7 @@ footer{margin-top:44px;padding-top:16px;border-top:1px solid var(--line);font-si
 <header><div class="wrap">
   <a class="back" href="index.html">← 回首頁</a>
   <span class="site">台灣高中學生升大學進路校系分析</span>
+  <a class="pinlink" href="index.html#compare">選擇庫<span class="badge" id="pin-count">0</span></a>
   <button class="theme-btn" id="theme-btn" type="button"><span class="theme-ico" aria-hidden="true"></span><span id="theme-label">夜間</span></button>
 </div></header>
 
@@ -123,7 +130,7 @@ footer{margin-top:44px;padding-top:16px;border-top:1px solid var(--line);font-si
     <h1>原住民族學生升學專區</h1>
     <p class="lead">整理原住民學生升大學可以運用的升學保障、各管道的原住民外加名額、大學原住民專班，以及衛福部「原住民族及離島地區醫事人員養成計畫」公費生管道。</p>
     <nav class="toc" aria-label="本頁目錄">
-      <a href="#rules">升學保障</a><a href="#quota">外加名額查詢</a><a href="#programs">原住民專班</a><a href="#medical">醫事人員養成計畫</a><a href="#links">相關資源</a>
+      <a href="index.html#compare">選擇庫</a><a href="#rules">升學保障</a><a href="#quota">外加名額查詢</a><a href="#programs">原住民專班</a><a href="#medical">醫事人員養成計畫</a><a href="#links">相關資源</a>
     </nav>
     <div class="stats">
       <div class="stat"><b id="st-apply">—</b><span>個人申請原住民外加名額（<span id="st-apply-n">—</span> 個校系）</span></div>
@@ -181,11 +188,11 @@ footer{margin-top:44px;padding-top:16px;border-top:1px solid var(--line);font-si
     </div>
     <p class="count" id="q-count"></p>
     <div class="tbl-wrap"><table>
-      <thead><tr><th>校系代碼</th><th>學校</th><th>校系</th><th class="num">一般名額</th><th class="num">原住民外加</th></tr></thead>
+      <thead><tr><th>校系代碼</th><th>學校</th><th>校系</th><th class="num">一般名額</th><th class="num">原住民外加</th><th>選擇庫</th></tr></thead>
       <tbody id="q-body"></tbody>
     </table></div>
     <button class="more-btn" id="q-more" type="button" hidden>顯示更多</button>
-    <p class="src">完整的學測檢定、篩選倍率與採計科目，請到首頁的<a href="index.html#apply">個人申請</a>或<a href="index.html#dist">分發入學</a>查詢。</p>
+    <p class="src">按「☆ 加入」可把校系放進<a href="index.html#compare">選擇庫</a>，和其他校系並排比較。完整的學測檢定、篩選倍率與採計科目，請到首頁的<a href="index.html#apply">個人申請</a>或<a href="index.html#dist">分發入學</a>查詢。</p>
   </section>
 
   <section class="block" id="programs">
@@ -269,6 +276,30 @@ function applyTheme(t, explicit){
   $("theme-btn").addEventListener("click", () => { const n = currentTheme() === "dark" ? "light" : "dark"; applyTheme(n, true); store.set("theme", n); });
 })();
 
+// ---------- 選擇庫（與主網頁共用瀏覽器暫存） ----------
+const pins = {star: [], apply: [], dist: [], tech: []};
+(function(){ const saved = store.get("pins"); if (saved) for (const k of Object.keys(pins)) if (Array.isArray(saved[k])) pins[k] = saved[k]; })();
+function updatePinCount(){ $("pin-count").textContent = Object.values(pins).reduce((n, a) => n + a.length, 0); }
+function pinBtn(m, code){
+  const on = pins[m].includes(code);
+  return `<button type="button" class="pin${on ? " on" : ""}" data-pin="${m}:${code}" aria-pressed="${on}">${on ? "★ 已加入" : "☆ 加入"}</button>`;
+}
+function togglePin(m, code){
+  // 寫入前重讀一次，避免覆蓋在主網頁另一個分頁新增的項目
+  const saved = store.get("pins");
+  if (saved) for (const k of Object.keys(pins)) if (Array.isArray(saved[k])) pins[k] = saved[k];
+  pins[m] = pins[m].includes(code) ? pins[m].filter(c => c !== code) : [...pins[m], code];
+  store.set("pins", pins); updatePinCount();
+}
+updatePinCount();
+document.addEventListener("click", e => {
+  const b = e.target.closest("[data-pin]");
+  if (!b) return;
+  const [m, code] = b.dataset.pin.split(":");
+  togglePin(m, code);
+  b.outerHTML = pinBtn(m, code);
+});
+
 // ---------- 原住民外加名額 ----------
 const num = v => /^\d+$/.test(String(v ?? "")) ? +v : 0;
 const CH = {
@@ -292,8 +323,8 @@ function renderQuota(reset = true){
   let rows = CH[ch].filter(r => (!sch || r.s === sch) && (!kw || (r.s + r.d + r.c).includes(kw)) && (!only || r.ind));
   if ($("q-sort").value === "desc") rows = [...rows].sort((a, b) => b.ind - a.ind || a.c.localeCompare(b.c));
   $("q-count").innerHTML = `共 <b>${rows.length.toLocaleString()}</b> 個${ch === "apply" ? "校系" : "學系"}，原住民外加名額合計 <b>${sum(rows).toLocaleString()}</b> 名`;
-  $("q-body").innerHTML = rows.slice(0, shown).map(r => `<tr><td>${esc(r.c)}</td><td>${esc(r.s)}</td><td>${esc(r.d)}</td><td class="num">${esc(r.q)}</td><td class="num">${r.ind ? `<b>${r.ind}</b>` : "無"}</td></tr>`).join("")
-    || '<tr><td colspan="5">沒有符合條件的校系。</td></tr>';
+  $("q-body").innerHTML = rows.slice(0, shown).map(r => `<tr><td>${esc(r.c)}</td><td>${esc(r.s)}</td><td>${esc(r.d)}</td><td class="num">${esc(r.q)}</td><td class="num">${r.ind ? `<b>${r.ind}</b>` : "無"}</td><td>${pinBtn(ch, r.c)}</td></tr>`).join("")
+    || '<tr><td colspan="6">沒有符合條件的校系。</td></tr>';
   $("q-more").hidden = rows.length <= shown;
   $("q-more").textContent = `顯示更多（還有 ${rows.length - shown} 筆）`;
 }
