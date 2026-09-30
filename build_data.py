@@ -228,12 +228,12 @@ for y in years_of("離原聯保_分發標準.csv"):
     hit = 0
     for r in JR:
         same_year = str(y) == r["y"]
-        m = [x for x in res if (x["保送代碼"] == r["c"]) if same_year] or \
-            [x for x in res if not same_year and x["保送代碼"][:2] == r["c"][:2]
+        m = [x for x in res if (x["簡章代碼"] == r["c"]) if same_year] or \
+            [x for x in res if not same_year and x["簡章代碼"][:2] == r["c"][:2]
              and norm(x["學校"]) == norm(r["s"]) and norm(x["學系"]) == norm(r["d"])]
         if m:
             hit += 1
-            r.setdefault("h", {})[str(y)] = [{"c": x["保送代碼"], "n": x["學系(組)名稱"], "s": x["分發最低標準"]} for x in m]
+            r.setdefault("h", {})[str(y)] = [{"c": x["簡章代碼"], "n": x["學系(組)名稱"], "s": x["分發最低標準"]} for x in m]
     jr_hist_report.append(f"{y} 離原聯保：{len(res)} 個校系，對應到 115 年 {hit} 個保送名額")
 print("\n".join(jr_hist_report))
 
@@ -244,6 +244,25 @@ if med_years:
     for x in csv.DictReader(open(HERE / f"{med_years[0]}醫事人員養成計畫_校系名額.csv", encoding="utf-8-sig")):
         MED.append({"y": x["學年度"], "s": x["學校"], "d": x["學系"], "yr": x["修業年限"], "id": x["籍屬身分"],
                     "c": x["校系代碼"], "q": x["招生名額"]})
+
+# 醫事人員養成計畫歷年分發最低標準（甄選委員會 doctor.html，代碼為「D_」＋簡章代碼）：
+# 同一學年度直接比對代碼；往年須學校與籍屬相同，學系名稱相同或相似度 ≥ 0.75
+med_report = []
+for y in years_of("醫事人員養成計畫_分發標準.csv"):
+    res = list(csv.DictReader(open(HERE / f"{y}醫事人員養成計畫_分發標準.csv", encoding="utf-8-sig")))
+    hit = 0
+    for r in MED:
+        if str(y) == r["y"]:
+            m = [x for x in res if x["簡章代碼"] == r["c"]]
+        else:
+            cand = [x for x in res if norm(x["學校"]) == norm(r["s"]) and x["類別"] == r["id"]]
+            m = [x for x in cand if norm(x["學系"]) == norm(r["d"])] or \
+                [x for x in cand if difflib.SequenceMatcher(None, norm(x["學系"]), norm(r["d"])).ratio() >= 0.75]
+        if m:
+            hit += 1
+            r.setdefault("h", {})[str(y)] = [{"c": x["簡章代碼"], "n": x["學系(組)名稱"], "s": x["分發最低標準"]} for x in m]
+    med_report.append(f"{y} 醫事人員養成計畫：{len(res)} 個校系，對應到 115 年 {hit} 個名額列")
+print("\n".join(med_report))
 
 js = "window.MED=" + json.dumps(MED, ensure_ascii=False, separators=(",", ":")) + ";\n"
 js += "window.JRACOIA=" + json.dumps(JR, ensure_ascii=False, separators=(",", ":")) + ";\n"

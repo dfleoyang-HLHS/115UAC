@@ -111,6 +111,7 @@ tbody tr:last-child td{border-bottom:0}
 .jr-need td{background:var(--bg);font-size:13px;line-height:1.7}
 .jr-tie{margin:0;padding-left:18px;font-size:13px}
 .jr-table{min-width:1080px}
+.med-table{min-width:760px}
 .jr-table td{font-size:13px}
 .jr-table td:nth-child(2){min-width:150px}
 .jr-hist{white-space:nowrap}
@@ -280,9 +281,10 @@ footer{margin-top:44px;padding-top:16px;border-top:1px solid var(--line);font-si
       <span class="count" id="med-count"></span>
     </div>
     <div class="tbl-wrap"><table class="med-table">
-      <thead><tr><th>校系代碼</th><th>學校</th><th>學系</th><th>修業年限</th><th>籍屬身分</th><th class="num">名額</th></tr></thead>
+      <thead><tr><th>校系代碼</th><th>學校</th><th>學系</th><th>修業年限</th><th>籍屬身分</th><th class="num">名額</th><th>歷年分發最低標準</th></tr></thead>
       <tbody id="med-body"></tbody>
     </table></div>
+    <p class="src">歷年分發最低標準取自大學甄選入學委員會統一分發結果（校系代碼為「D_」＋簡章代碼，如 D_A011）：「正取」表示只分發到正取生、「備N」表示遞補到備取第 N 名、「無」表示沒有錄取生分發入學。往年以相同學校、學系與籍屬對應，括號內為當年代碼。</p>
     <p class="src">校系代碼為本計畫專用（第 1 碼學校、第 2～3 碼學系、第 4 碼籍屬：1 原住民、2 澎湖縣、3 金門縣、4 連江縣、6 綠島鄉、7 蘭嶼鄉、8 偏鄉），與其他管道的校系代碼不同。資料來源：衛生福利部 115 學年度原住民族及離島地區醫事人員養成計畫公費生學士班甄試入學招生簡章。</p>
     <div class="linkrow">
       <a href="https://dep.mohw.gov.tw/DONAHC/cp-4123-85258-104.html" target="_blank" rel="noopener">衛福部護理及健康照護司：完整公告與簡章<span class="ext" aria-hidden="true">↗</span></a>
@@ -347,7 +349,7 @@ footer{margin-top:44px;padding-top:16px;border-top:1px solid var(--line);font-si
   <footer>外加名額資料取自 115 學年度大學甄選入學委員會校系分則與大學分發入學招生簡章；各項規定、名額與時程以當學年度官方簡章公告為準。</footer>
 </main>
 
-<script src="data.js?v=20261007"></script>
+<script src="data.js?v=20261008"></script>
 <script>
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
@@ -527,8 +529,8 @@ function renderMed(){
     return `<button type="button" class="${k === medId ? "on" : ""}" data-id="${k}" role="tab" aria-selected="${k === medId}">${k}（${n}）</button>`;
   }).join("");
   $("med-body").innerHTML = rows.map(r => `<tr><td>${esc(r.c)}</td><td>${esc(r.s)}</td><td>${esc(r.d)}</td><td>${esc(r.yr)}</td>
-    <td>${esc(r.id)}</td><td class="num"><b>${esc(r.q)}</b></td></tr>`).join("")
-    + `<tr><td colspan="5"><b>合計</b></td><td class="num"><b>${total}</b></td></tr>`;
+    <td>${esc(r.id)}</td><td class="num"><b>${esc(r.q)}</b></td><td class="jr-hist">${jrHist(r)}</td></tr>`).join("")
+    + `<tr><td colspan="5"><b>合計</b></td><td class="num"><b>${total}</b></td><td></td></tr>`;
 }
 $("med-seg").addEventListener("click", e => { const b = e.target.closest("[data-id]"); if (b){ medId = b.dataset.id; renderMed(); } });
 renderMed();
