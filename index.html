@@ -161,6 +161,15 @@ nav a .badge{display:inline-block;min-width:20px;padding:0 6px;margin-left:4px;b
   .step-card dl{grid-template-columns:1fr;gap:2px}
   .step-card dd{margin-bottom:6px}
 }
+.links{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;margin-top:12px;padding-top:10px;border-top:1px dashed var(--line);font-size:13px}
+.links-t{font-size:12px;color:var(--muted);letter-spacing:.08em;margin-right:2px}
+.links a{color:var(--accent);text-decoration:none;border:1px solid var(--line);border-radius:8px;padding:3px 9px;background:var(--bg)}
+.links a:hover{border-color:var(--accent);text-decoration:underline}
+.links a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.links .ext{margin-left:3px;font-size:11px}
+.xroute{display:flex;flex-direction:column}
+.xroute .links{margin-top:auto;padding-top:10px}
+.xroute > ul,.xroute > p:not(.xtag){margin-bottom:12px}
 @media (prefers-reduced-motion:reduce){.entry{transition:none}}
 @media (max-width:600px){.hero h2{font-size:21px} nav{margin-left:0}}
 </style>
@@ -202,6 +211,7 @@ nav a .badge{display:inline-block;min-width:20px;padding:0 6px;margin-left:4px;b
               <dt>優點</dt><dd>最早放榜，能展現特定學科或領域的專長。</dd>
               <dt>適合對象</dt><dd>具備單科天賦、重大競賽獲獎經歷、特殊專長、實驗教育資歷或特殊境遇的學生。</dd>
             </dl>
+            <div class="links"><span class="links-t">官方網站</span><a href="https://nsdua.moe.edu.tw/" target="_blank" rel="noopener">大學多元入學升學網（各校特殊選才簡章）<span class="ext" aria-hidden="true">↗</span></a><a href="https://www.jbcrc.edu.tw/diverse-admissions/special-talent-admissions/" target="_blank" rel="noopener">大學招生委員會聯合會－特殊選才專區<span class="ext" aria-hidden="true">↗</span></a></div>
           </div>
         </li>
         <li class="step star">
@@ -215,6 +225,7 @@ nav a .badge{display:inline-block;min-width:20px;padding:0 6px;margin-left:4px;b
               <dt>適合對象</dt><dd>高中三年在校成績穩定且名列前茅（如校排前 1%～20%）者。</dd>
             </dl>
             <a class="go" href="#star">查詢繁星推薦校系 →</a>
+            <div class="links"><span class="links-t">官方網站</span><a href="https://www.cac.edu.tw/" target="_blank" rel="noopener">大學甄選入學委員會（繁星推薦簡章、校系分則）<span class="ext" aria-hidden="true">↗</span></a></div>
           </div>
         </li>
         <li class="step apply">
@@ -228,6 +239,7 @@ nav a .badge{display:inline-block;min-width:20px;padding:0 6px;margin-left:4px;b
               <dt>適合對象</dt><dd>學測成績平穩、對特定科系有明確興趣，且平時有積累多元表現與作品的學生。</dd>
             </dl>
             <a class="go" href="#apply">查詢個人申請校系 →</a>
+            <div class="links"><span class="links-t">官方網站</span><a href="https://www.cac.edu.tw/" target="_blank" rel="noopener">大學甄選入學委員會（申請入學簡章、校系分則、歷年篩選標準）<span class="ext" aria-hidden="true">↗</span></a></div>
           </div>
         </li>
         <li class="step dist">
@@ -240,6 +252,7 @@ nav a .badge{display:inline-block;min-width:20px;padding:0 6px;margin-left:4px;b
               <dt>適合對象</dt><dd>擅長筆試、學測失常，或傾向「一考定勝負」、不想準備二階學習歷程與面試者。</dd>
             </dl>
             <a class="go" href="#dist">查詢分發入學學系 →</a>
+            <div class="links"><span class="links-t">官方網站</span><a href="https://www.uac.edu.tw/" target="_blank" rel="noopener">大學考試入學分發委員會（分發簡章、採計科目、歷年錄取分數）<span class="ext" aria-hidden="true">↗</span></a></div>
           </div>
         </li>
       </ol>
@@ -250,6 +263,7 @@ nav a .badge{display:inline-block;min-width:20px;padding:0 6px;margin-left:4px;b
           <h4>四技申請</h4>
           <p class="xtag">普通高中生申請科技大學</p>
           <p>持學測成績申請科技大學，最多填報 6 個志願。第一階段看學測成績，第二階段參加複試與資料審查。</p>
+            <div class="links"><span class="links-t">官方網站</span><a href="https://www.jctv.ntut.edu.tw/caac/" target="_blank" rel="noopener">科技校院日間部四年制申請入學聯合招生委員會<span class="ext" aria-hidden="true">↗</span></a></div>
         </article>
         <article class="xroute">
           <h4>軍警院校招生</h4>
@@ -258,19 +272,22 @@ nav a .badge{display:inline-block;min-width:20px;padding:0 6px;margin-left:4px;b
             <li><b>國防軍校</b>：採計學測成績，配合體檢、智力測驗及面試。</li>
             <li><b>警察大學／警察專科學校</b>：多採獨立招生考試（筆試與體能測驗），或採計學測搭配面試。</li>
           </ul>
+            <div class="links"><span class="links-t">官方網站</span><a href="https://rdrc.mnd.gov.tw/" target="_blank" rel="noopener">國軍人才招募中心（軍校正期班簡章、體檢規定）<span class="ext" aria-hidden="true">↗</span></a><a href="https://www.cpu.edu.tw/p/422-1000-1005.php?Lang=zh-tw" target="_blank" rel="noopener">中央警察大學 招生資訊<span class="ext" aria-hidden="true">↗</span></a><a href="https://www.tpa.edu.tw/" target="_blank" rel="noopener">臺灣警察專科學校（首頁「招生資訊」）<span class="ext" aria-hidden="true">↗</span></a></div>
         </article>
         <article class="xroute">
           <h4>運動績優生</h4>
           <p class="xtag">甄審、甄試與獨招</p>
           <p>專為具運動優秀表現或國家級賽事獲獎證明的學生設定，可透過免試甄審、甄試（國英數筆試＋術科）或各校運動獨招申請。</p>
+            <div class="links"><span class="links-t">官方網站</span><a href="https://lulu.ntus.edu.tw/" target="_blank" rel="noopener">中等以上學校運動績優學生升學輔導網<span class="ext" aria-hidden="true">↗</span></a></div>
         </article>
         <article class="xroute">
           <h4>青年儲蓄帳戶</h4>
           <p class="xtag">青年教育與就業儲蓄帳戶方案</p>
           <p>參加方案並完成職場或體驗學習 2～3 年者，可透過專案管道免考學測（採體驗報告與面試），申請一般大學或科技大學。</p>
+            <div class="links"><span class="links-t">官方網站</span><a href="https://ycnp.yda.gov.tw/" target="_blank" rel="noopener">青年署 青年生涯領航計畫<span class="ext" aria-hidden="true">↗</span></a><a href="https://www.edu.tw/1013/" target="_blank" rel="noopener">教育部 青年教育與就業儲蓄帳戶方案<span class="ext" aria-hidden="true">↗</span></a></div>
         </article>
       </div>
-      <p class="note routes-foot">各管道實際時程與規定以當學年度招生簡章公告為準。</p>
+      <p class="note routes-foot">招生簡章與校系分則每學年度更新，進入官方網站後請點選當年度專區下載；各管道實際時程與規定以當學年度簡章公告為準。</p>
     </section>
   </section>
 
