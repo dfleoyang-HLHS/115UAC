@@ -128,6 +128,10 @@ nav a .badge{display:inline-block;min-width:20px;padding:0 6px;margin-left:4px;b
 .cmp ol{margin:0;padding-left:18px}
 .cmp .x{float:right;border:0;background:none;color:var(--muted);cursor:pointer;font-size:16px;line-height:1;padding:0 0 0 8px}
 .empty{padding:28px 18px;text-align:center;color:var(--muted)}
+.cmp-ind{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 14px;padding:10px 16px;border-radius:12px;background:var(--ok-soft);color:var(--ok);text-decoration:none;font-size:14px}
+.cmp-ind b{display:block;font-size:15px}
+.cmp-ind:hover b{text-decoration:underline}
+.cmp-ind:focus-visible{outline:2px solid var(--ok);outline-offset:2px}
 .sync{font-size:12px;color:var(--muted)}
 /* 升大學管道介紹：依時程排列的時間軸＋特殊管道卡片 */
 .routes{margin-top:44px;display:flex;flex-direction:column;gap:18px}
@@ -357,6 +361,7 @@ nav a .badge{display:inline-block;min-width:20px;padding:0 6px;margin-left:4px;b
   <!-- 選擇庫比較頁 -->
   <section id="compare" class="hidden">
     <div class="summary"><b>選擇庫</b><span>把各管道加入的校系並排比較；符合與否依你目前輸入的成績即時判斷。</span></div>
+    <a class="cmp-ind" href="indigenous.html"><span><b>原住民族學生升學專區</b>升學保障（加分 10%／35%）、原住民外加名額查詢、原住民專班、醫事人員養成計畫</span><span aria-hidden="true">→</span></a>
     <div class="ctabs" id="ctabs"></div>
     <div id="cmp-body"></div>
     <div class="summary" style="margin-top:12px"><span class="sync" id="sync-note"></span><span style="flex:1"></span>
@@ -847,6 +852,7 @@ function renderCompare(){
     body += line("校系類別", ({r}) => cell(esc(r.cat)));
     body += line("招生名額", ({r}) => cell(`<span class="num">${esc(r.q)}</span>`));
     body += line("預計甄試人數", ({r}) => cell(esc(r.ex)));
+    body += line("原住民外加名額", ({r}) => cell(esc(r.ind || "--")));
     body += line("加權級分（參考）", ({r}) => { const w = weighted(r, sc); return cell(w != null ? `<span class="num">${w}</span>` : "--"); });
     const names = [...new Set(cols.flatMap(({r}) => r.sub.map(x => x[0])))];
     for (const s of names){
