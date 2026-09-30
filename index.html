@@ -119,6 +119,48 @@ nav a .badge{display:inline-block;min-width:20px;padding:0 6px;margin-left:4px;b
 .cmp .x{float:right;border:0;background:none;color:var(--muted);cursor:pointer;font-size:16px;line-height:1;padding:0 0 0 8px}
 .empty{padding:28px 18px;text-align:center;color:var(--muted)}
 .sync{font-size:12px;color:var(--muted)}
+/* 升大學管道介紹：依時程排列的時間軸＋特殊管道卡片 */
+.routes{margin-top:44px;display:flex;flex-direction:column;gap:18px}
+.routes-head h2{font-size:24px;margin:0 0 6px}
+.routes-head p{margin:0;color:var(--muted);max-width:62ch}
+.routes-sub{font-size:16px;margin:10px 0 0;display:flex;align-items:baseline;gap:10px}
+.routes-sub span{font-size:12px;font-weight:400;color:var(--muted);letter-spacing:.08em}
+.timeline{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:0}
+.step{display:grid;grid-template-columns:104px 1fr;gap:0 18px;position:relative;--c:var(--accent);--cs:var(--accent-soft)}
+.step.special{--c:var(--muted);--cs:var(--bg)}
+.step.star{--c:var(--star);--cs:var(--star-soft)}
+.step.dist{--c:var(--ok);--cs:var(--ok-soft)}
+.when{text-align:right;font-size:12px;color:var(--muted);padding-top:16px;line-height:1.5;position:relative}
+.when b{display:block;font-size:15px;color:var(--c);font-variant-numeric:tabular-nums}
+.step::before{content:"";position:absolute;left:113px;top:0;bottom:0;width:2px;background:var(--line)}
+.step:first-child::before{top:22px}
+.step:last-child::before{bottom:auto;height:22px}
+.step::after{content:"";position:absolute;left:107px;top:18px;width:14px;height:14px;border-radius:50%;background:var(--card);border:3px solid var(--c)}
+.step-card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin:0 0 14px 14px;min-width:0}
+.step-card h4{margin:0 0 10px;font-size:18px;font-family:var(--font-display);color:var(--c)}
+.step-card dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:6px 14px;font-size:14px}
+.step-card dt{color:var(--muted);white-space:nowrap}
+.step-card dd{margin:0;min-width:0}
+.go{display:inline-block;margin-top:12px;padding:5px 12px;border-radius:8px;background:var(--cs);color:var(--c);text-decoration:none;font-size:14px;font-weight:500}
+.go:hover{text-decoration:underline}
+.go:focus-visible{outline:2px solid var(--c);outline-offset:2px}
+.extra-routes{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
+.xroute{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;font-size:14px;min-width:0}
+.xroute h4{margin:0;font-size:16px}
+.xroute .xtag{margin:2px 0 8px;font-size:12px;color:var(--muted)}
+.xroute p{margin:0}
+.xroute ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px}
+.routes-foot{margin:0}
+@media (max-width:600px){
+  .step{grid-template-columns:1fr}
+  .step::before,.step::after{display:none}
+  .when{text-align:left;padding:0 0 4px;display:flex;gap:8px;align-items:baseline}
+  .when br{display:none}
+  .when b{display:inline}
+  .step-card{margin:0 0 12px;border-top:3px solid var(--c)}
+  .step-card dl{grid-template-columns:1fr;gap:2px}
+  .step-card dd{margin-bottom:6px}
+}
 @media (prefers-reduced-motion:reduce){.entry{transition:none}}
 @media (max-width:600px){.hero h2{font-size:21px} nav{margin-left:0}}
 </style>
@@ -142,6 +184,94 @@ nav a .badge{display:inline-block;min-width:20px;padding:0 6px;margin-left:4px;b
       <a class="entry apply" href="#apply"><span class="tag">2,206 校系</span><h3>個人申請</h3><p>依第一階段學測／英聽檢定標準篩選，並列出篩選倍率、採計方式與指定項目。</p></a>
       <a class="entry dist" href="#dist"><span class="tag">1,764 學系</span><h3>分發入學</h3><p>依學測／英聽檢定標準與分科測驗應考科目篩選，並列出採計科目、加權倍率與同分參酌順序。</p></a>
     </div>
+    <!-- 升大學管道介紹 -->
+    <section class="routes" aria-labelledby="routes-title">
+      <div class="routes-head">
+        <h2 id="routes-title">高中生升大學管道</h2>
+        <p>普通高中學生升大學有四大主流管道，依時程由早到晚進行；另有跨體系與特定專案管道，對應不同需求。</p>
+      </div>
+
+      <h3 class="routes-sub">四大主流管道 <span>依時程排列</span></h3>
+      <ol class="timeline">
+        <li class="step special">
+          <div class="when">高三上<br><b>10～12 月</b></div>
+          <div class="step-card">
+            <h4>特殊選才</h4>
+            <dl>
+              <dt>採計方式</dt><dd>不看學測與分科測驗成績，純看書面資料審查（作品集、競賽證明）、面試或實作測驗。</dd>
+              <dt>優點</dt><dd>最早放榜，能展現特定學科或領域的專長。</dd>
+              <dt>適合對象</dt><dd>具備單科天賦、重大競賽獲獎經歷、特殊專長、實驗教育資歷或特殊境遇的學生。</dd>
+            </dl>
+          </div>
+        </li>
+        <li class="step star">
+          <div class="when">學測放榜後<br><b>約 3 月</b></div>
+          <div class="step-card">
+            <h4>繁星推薦</h4>
+            <dl>
+              <dt>採計方式</dt><dd>高中前五學期在校成績百分比（校排）＋學測成績（作為最低檢定門檻）。</dd>
+              <dt>資格限制</dt><dd>需全程就讀同一所高中，且無轉學。</dd>
+              <dt>優點</dt><dd>免比二階學習歷程檔案與面試（第八類醫牙學群除外），落實區域均衡政策。</dd>
+              <dt>適合對象</dt><dd>高中三年在校成績穩定且名列前茅（如校排前 1%～20%）者。</dd>
+            </dl>
+            <a class="go" href="#star">查詢繁星推薦校系 →</a>
+          </div>
+        </li>
+        <li class="step apply">
+          <div class="when">個人申請<br><b>約 3～6 月</b></div>
+          <div class="step-card">
+            <h4>申請入學</h4>
+            <dl>
+              <dt>第一階段</dt><dd>學測成績篩選（最多採計 4 科）。</dd>
+              <dt>第二階段</dt><dd>學習歷程檔案（課程學習成果、多元表現）、面試、筆試或術科實作。</dd>
+              <dt>志願上限</dt><dd>最多可選填 6 個大學校系。</dd>
+              <dt>適合對象</dt><dd>學測成績平穩、對特定科系有明確興趣，且平時有積累多元表現與作品的學生。</dd>
+            </dl>
+            <a class="go" href="#apply">查詢個人申請校系 →</a>
+          </div>
+        </li>
+        <li class="step dist">
+          <div class="when">考試分發<br><b>約 7～8 月</b></div>
+          <div class="step-card">
+            <h4>分發入學</h4>
+            <dl>
+              <dt>採計方式</dt><dd>分科測驗（數甲、數乙、物、化、生、歷、地、公）及學測成績組合，採計 3～5 科。</dd>
+              <dt>志願上限</dt><dd>最多可選填 100 個志願。</dd>
+              <dt>適合對象</dt><dd>擅長筆試、學測失常，或傾向「一考定勝負」、不想準備二階學習歷程與面試者。</dd>
+            </dl>
+            <a class="go" href="#dist">查詢分發入學學系 →</a>
+          </div>
+        </li>
+      </ol>
+
+      <h3 class="routes-sub">跨體系與特定專案管道</h3>
+      <div class="extra-routes">
+        <article class="xroute">
+          <h4>四技申請</h4>
+          <p class="xtag">普通高中生申請科技大學</p>
+          <p>持學測成績申請科技大學，最多填報 6 個志願。第一階段看學測成績，第二階段參加複試與資料審查。</p>
+        </article>
+        <article class="xroute">
+          <h4>軍警院校招生</h4>
+          <p class="xtag">國防軍校／警察大學／警察專科學校</p>
+          <ul>
+            <li><b>國防軍校</b>：採計學測成績，配合體檢、智力測驗及面試。</li>
+            <li><b>警察大學／警察專科學校</b>：多採獨立招生考試（筆試與體能測驗），或採計學測搭配面試。</li>
+          </ul>
+        </article>
+        <article class="xroute">
+          <h4>運動績優生</h4>
+          <p class="xtag">甄審、甄試與獨招</p>
+          <p>專為具運動優秀表現或國家級賽事獲獎證明的學生設定，可透過免試甄審、甄試（國英數筆試＋術科）或各校運動獨招申請。</p>
+        </article>
+        <article class="xroute">
+          <h4>青年儲蓄帳戶</h4>
+          <p class="xtag">青年教育與就業儲蓄帳戶方案</p>
+          <p>參加方案並完成職場或體驗學習 2～3 年者，可透過專案管道免考學測（採體驗報告與面試），申請一般大學或科技大學。</p>
+        </article>
+      </div>
+      <p class="note routes-foot">各管道實際時程與規定以當學年度招生簡章公告為準。</p>
+    </section>
   </section>
 
   <!-- 查詢頁（兩種管道共用） -->
