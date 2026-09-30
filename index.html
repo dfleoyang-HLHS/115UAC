@@ -388,7 +388,7 @@ nav a .badge{display:inline-block;min-width:20px;padding:0 6px;margin-left:4px;b
   </section>
 </main>
 
-<script src="data.js?v=20261002"></script>
+<script src="data.js?v=20261003"></script>
 <script>
 const SUBJ = ["國文","英文","數學A","數學B","社會","自然"];
 const LEVELS = ["頂標","前標","均標","後標","底標"];
@@ -706,6 +706,7 @@ function histDist(r, res){
     }
     const sp = Object.entries(e.sp || {}).map(([k, v]) => `${k} ${esc(v)}`).join("、");
     return `<div class="hyear"><div class="hy">${y}</div>
+      ${e.q ? `<div class="hline note">招生名額 ${esc(e.q)}${+e.rf ? `（含其他管道回流 ${esc(e.rf)}）` : ""}</div>` : ""}
       <div class="hline">錄取 ${esc(e.n)} 人${e.s ? `，最低 <b class="hnum">${esc(e.s)}</b>` : "（未錄取）"} ${cmp}</div>
       ${e.ts ? `<div class="hline note">同分參酌：${esc(e.ts)} ${esc(e.tv)}</div>` : ""}
       ${sp ? `<div class="hline note">${sp}</div>` : ""}</div>`;
