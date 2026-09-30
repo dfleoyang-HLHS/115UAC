@@ -105,6 +105,12 @@ tbody tr:last-child td{border-bottom:0}
 .linkrow a{font-size:14px;text-decoration:none;border:1px solid var(--line);border-radius:8px;padding:5px 12px;background:var(--card)}
 .linkrow a:hover{border-color:var(--accent);text-decoration:underline}
 .warn-box{background:var(--warn-soft);color:var(--warn);border-radius:10px;padding:10px 14px;font-size:14px}
+.jr-row{cursor:pointer}
+.jr-row:hover td{background:var(--ind-soft)}
+.jr-row:focus-visible{outline:2px solid var(--ind);outline-offset:-2px}
+.jr-need td{background:var(--bg);font-size:13px;line-height:1.7}
+.jr-tie{margin:0;padding-left:18px;font-size:13px}
+.jr-table td{font-size:13px}
 footer{margin-top:44px;padding-top:16px;border-top:1px solid var(--line);font-size:13px;color:var(--muted)}
 @media (max-width:720px){
   header .site{order:3;width:100%;flex:none;font-size:14px}
@@ -130,7 +136,7 @@ footer{margin-top:44px;padding-top:16px;border-top:1px solid var(--line);font-si
     <h1>原住民族學生升學專區</h1>
     <p class="lead">整理原住民學生升大學可以運用的升學保障、各管道的原住民外加名額、大學原住民專班，以及衛福部「原住民族及離島地區醫事人員養成計畫」公費生管道。</p>
     <nav class="toc" aria-label="本頁目錄">
-      <a href="index.html#compare">選擇庫</a><a href="#rules">升學保障</a><a href="#quota">外加名額查詢</a><a href="#programs">原住民專班</a><a href="#medical">醫事人員養成計畫</a><a href="#links">相關資源</a>
+      <a href="index.html#compare">選擇庫</a><a href="#rules">升學保障</a><a href="#quota">外加名額查詢</a><a href="#programs">原住民專班</a><a href="#medical">醫事人員養成計畫</a><a href="#links">相關資源</a><a href="#teacher">師資公費生保送</a>
     </nav>
     <div class="stats">
       <div class="stat"><b id="st-apply">—</b><span>個人申請原住民外加名額（<span id="st-apply-n">—</span> 個校系）</span></div>
@@ -247,10 +253,50 @@ footer{margin-top:44px;padding-top:16px;border-top:1px solid var(--line);font-si
     </div>
   </section>
 
+  <section class="block" id="teacher">
+    <h2>離島地區及原住民高級中等學校應屆畢業生升學國(市)立師範及教育大學聯合保送甄試 <small>師資培育公費生（簡稱離原聯保）</small></h2>
+    <p class="intro">由各原住民鄉鎮與離島地區的教育主管機關依師資需求提報名額，保送原住民與離島高中應屆畢業生就讀師範及教育大學。錄取生是<strong>師資培育公費生</strong>，畢業並取得教師證書後，分發回原保送地區的國中小服務。承辦學校為國立臺南大學。</p>
+    <div class="med">
+      <div class="card">
+        <dl class="facts">
+          <dt>115 名額</dt><dd>原住民 16 名（14 個保送校系）、離島 15 名；招生學校為臺灣師大、臺北教大、臺北市大、臺中教大、臺南大學、屏東大學、臺東大學、東華大學</dd>
+          <dt>原住民資格</dt><dd>具原住民身分、已取得<strong>中級以上族語認證</strong>的應屆畢業生；全程就讀高中（普通科、學術學程、藝術才能班或體育班），高一、高二每學期學業平均及格</dd>
+          <dt>錄取順序</dt><dd>先錄取族語別、戶籍地、身分別（山地／平地）都與保送校系相同的<strong>甲種</strong>考生；乙種（身分別不同）、丙種（戶籍地不同）、丁種（僅族語別相同）、戊種依序列入備取</dd>
+          <dt>甄試方式</dt><dd>採計學測成績（音樂、體育系另加術科），先依各校系檢定標準篩選，再依採計方式計算總成績；成績總和為零級分或術科缺考不得選填</dd>
+          <dt>權利義務</dt><dd>不得保留入學資格；畢業前須修畢原住民族之民族教育次專長、取得<strong>中高級以上族語認證</strong>、部落服務實習 8 週；未服務期滿須追繳公費</dd>
+        </dl>
+      </div>
+      <div class="card">
+        <ol class="steps" aria-label="115 學年度時程">
+          <li><time>114/12/1～12/8</time><span>向就讀高中提出資格審查申請（報名費 110 元，中低收入戶 44 元，低收入戶免繳）</span></li>
+          <li><time>115/2/26</time><span>學測成績通知</span></li>
+          <li><time>115/3/25</time><span>補繳族語認證合格證書截止（限報考 114 年度第二次族語認證者）</span></li>
+          <li><time>115/4/1 前</time><span>公告資格符合名單</span></li>
+          <li><time>115/4/13～4/17</time><span>由高中集體上網選填保送校系</span></li>
+          <li><time>115/5/6 前</time><span>公告正、備取名單</span></li>
+          <li><time>115/6/4～6/5</time><span>與申請入學、醫事人員養成計畫錄取生一起，到甄選委員會登記就讀志願序</span></li>
+          <li><time>115/6/11</time><span>公告統一分發結果</span></li>
+        </ol>
+      </div>
+    </div>
+    <div class="tool-bar">
+      <div class="seg" role="tablist" aria-label="保送類別">
+        <button type="button" id="jr-ind" class="on" role="tab" aria-selected="true">原住民（16 名）</button>
+        <button type="button" id="jr-isl" role="tab" aria-selected="false">離島（15 名）</button>
+      </div>
+      <span class="count" id="jr-count"></span>
+    </div>
+    <div class="tbl-wrap"><table class="jr-table">
+      <thead><tr><th>保送代碼</th><th>學校／學系</th><th id="jr-h-lang">族語別</th><th>保送縣市</th><th class="num">名額</th><th>學測檢定</th><th>採計方式</th><th>同分參酌（前 3 項）</th></tr></thead>
+      <tbody id="jr-body"></tbody>
+    </table></div>
+    <p class="src">保送代碼為本管道專用（如 AAC01），與繁星推薦、申請入學、分發入學的校系代碼不同，因此不列入選擇庫與歷年錄取結果。點選各列可看需求專長與分發學校。資料來源：<a href="https://admissions.nutn.edu.tw/jracoia/pdf/Brochure115.pdf" target="_blank" rel="noopener">115 學年度離原聯保簡章<span class="ext" aria-hidden="true">↗</span></a>、<a href="https://admissions.nutn.edu.tw/jracoia/" target="_blank" rel="noopener">聯保會網站<span class="ext" aria-hidden="true">↗</span></a></p>
+  </section>
+
   <footer>外加名額資料取自 115 學年度大學甄選入學委員會校系分則與大學分發入學招生簡章；各項規定、名額與時程以當學年度官方簡章公告為準。</footer>
 </main>
 
-<script src="data.js?v=20261004"></script>
+<script src="data.js?v=20261005"></script>
 <script>
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
@@ -369,6 +415,41 @@ const bySchool = {};
 PROGRAMS.forEach(([s, n, u]) => (bySchool[s] ||= []).push([n, u]));
 $("prog-list").innerHTML = Object.entries(bySchool).map(([s, list]) => `<div class="card prog"><h3>${esc(s)}</h3><ul>${
   list.map(([n, u]) => `<li><a href="${esc(u)}" target="_blank" rel="noopener">${esc(n)}<span class="ext" aria-hidden="true">↗</span></a></li>`).join("")}</ul></div>`).join("");
+
+// ---------- 離原聯保（師資培育公費生保送甄試） ----------
+const JR = window.JRACOIA || [];
+let jrKind = "原住民";
+function renderJR(){
+  const rows = JR.filter(r => r.k === jrKind);
+  $("jr-count").textContent = `${rows.length} 個保送校系，名額合計 ${rows.reduce((a, r) => a + (+r.q || 0), 0)} 名`;
+  $("jr-h-lang").textContent = jrKind === "原住民" ? "族語別／身分別" : "身分別";
+  $("jr-body").innerHTML = rows.map(r => {
+    const std = Object.entries(r.std).map(([s, v]) => `${s} ${v}`).join("、") || "無";
+    const w = Object.entries(r.w).map(([s, v]) => `${s}×${v}`).join("、") +
+      (r.sk ? `<br>術科：${esc(r.sk)}（佔 ${esc(r.skp)}）` : "") + (r.p ? `<br><span class="note">學測佔 ${esc(r.p)}</span>` : "");
+    return `<tr class="jr-row" tabindex="0"><td>${esc(r.c)}</td><td><b>${esc(r.s)}</b><br>${esc(r.d)}</td>
+      <td>${jrKind === "原住民" ? `${esc(r.lang)}<br><span class="note">${esc(r.id)}</span>` : esc(r.id)}</td>
+      <td>${esc(r.area)}</td><td class="num"><b>${esc(r.q)}</b></td><td>${esc(std)}</td><td>${w}</td>
+      <td><ol class="jr-tie">${r.tie.slice(0, 3).map(t => `<li>${esc(t)}</li>`).join("")}</ol></td></tr>
+      <tr class="jr-need" hidden><td colspan="8"><b>需求專長與分發：</b>${esc(r.need)}${r.tie.length > 3 ? `<br><b>同分參酌完整順序：</b>${r.tie.map((t, i) => `${i + 1}. ${esc(t)}`).join("　")}` : ""}</td></tr>`;
+  }).join("");
+}
+function setJR(k){
+  jrKind = k;
+  [["jr-ind", "原住民"], ["jr-isl", "離島"]].forEach(([id, v]) => { $(id).classList.toggle("on", v === k); $(id).setAttribute("aria-selected", v === k); });
+  renderJR();
+}
+$("jr-ind").addEventListener("click", () => setJR("原住民"));
+$("jr-isl").addEventListener("click", () => setJR("離島"));
+$("jr-body").addEventListener("click", e => {
+  const tr = e.target.closest(".jr-row");
+  if (tr) tr.nextElementSibling.hidden = !tr.nextElementSibling.hidden;
+});
+$("jr-body").addEventListener("keydown", e => {
+  const tr = e.target.closest(".jr-row");
+  if (tr && (e.key === "Enter" || e.key === " ")){ e.preventDefault(); tr.nextElementSibling.hidden = !tr.nextElementSibling.hidden; }
+});
+setJR("原住民");
 
 // ---------- 醫事人員養成計畫名額（115 學年度） ----------
 const MED = [["醫學系", 33], ["牙醫學系", 6], ["護理學系", 52], ["藥學系", 11], ["醫學生物技術暨檢驗學系", 3], ["生物醫學影像暨放射科學學系", 2],

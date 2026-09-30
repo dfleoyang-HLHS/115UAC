@@ -208,7 +208,20 @@ for y in years_of("分發入學_錄取結果.csv"):
     report.append(f"{y} 分發：對應 {m.hit} 列、未對應 {m.miss} 列")
 print("\n".join(report))
 
-js = "window.HIST=" + json.dumps(HIST, ensure_ascii=False, separators=(",", ":")) + ";\n"
+# ---------- 離原聯保（師資培育公費生保送甄試）：取最新學年度的校系分則，代碼自成一套，不與其他管道合併 ----------
+JR = []
+jr_years = years_of("離原聯保_校系分則.csv")
+if jr_years:
+    for x in csv.DictReader(open(HERE / f"{jr_years[0]}離原聯保_校系分則.csv", encoding="utf-8-sig")):
+        JR.append({"y": x["學年度"], "k": x["類別"], "c": x["校系代碼"], "s": x["學校"], "d": x["學系"],
+                   "lang": x["族語別"], "area": x["保送縣市"], "id": x["身分別"], "q": x["招生名額"],
+                   "std": {s: x[f"檢定_{s}"] for s in SUBJ[:6] if x[f"檢定_{s}"] not in ("", "--")},
+                   "w": {s: x[f"採計_{s}"] for s in SUBJ[:6] if x[f"採計_{s}"] not in ("", "--")},
+                   "p": x["學測佔總成績比例"], "sk": x["術科採計"], "skp": x["術科佔總成績比例"],
+                   "tie": [x[f"同分參酌{i}"] for i in range(1, 7) if x[f"同分參酌{i}"]], "need": x["需求專長與分發"]})
+
+js = "window.JRACOIA=" + json.dumps(JR, ensure_ascii=False, separators=(",", ":")) + ";\n"
+js += "window.HIST=" + json.dumps(HIST, ensure_ascii=False, separators=(",", ":")) + ";\n"
 js += "window.TECH=" + json.dumps(tech_out, ensure_ascii=False, separators=(",", ":")) + ";\n"
 js += "window.DIST=" + json.dumps(dist_out, ensure_ascii=False, separators=(",", ":")) + ";\n"
 js += "window.STAR=" + json.dumps(star, ensure_ascii=False, separators=(",", ":")) + ";\n"
