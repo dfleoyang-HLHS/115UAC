@@ -103,8 +103,23 @@ for x in dist_rows[1:]:
         "std": [c for c in conds if c], "sub": subs, "note": rec["選系說明"],
     })
 
-js = "window.DIST=" + json.dumps(dist_out, ensure_ascii=False, separators=(",", ":")) + ";\n"
+# ---------- 四技申請（115 學年度，build_caac.py 產生的 CSV） ----------
+tech_out = []
+for rec in csv.DictReader(open(HERE / "115四技申請_校系分則.csv", encoding="utf-8-sig")):
+    ties = [[rec[f"同分參酌{i}"], rec[f"同分參酌{i}佔總成績比例"]] for i in range(1, 8) if rec[f"同分參酌{i}"]]
+    tech_out.append({
+        "c": rec["志願代碼"], "s": rec["學校"], "d": rec["系組名稱"], "reg": rec["區位"],
+        "lim": rec["該校可選填系組數"], "q": rec["招生名額"], "ex": rec["預計複試人數"], "fee": rec["第二階段複試費"],
+        "w": {s: rec[f"{s}權重"] for s in SUBJ[:6] if rec[f"{s}權重"]},
+        "s2": [x for x in (rec["書面資料審查"], rec["到校評分項目"]) if x],
+        "tie": ties,
+        "apcs": f"{rec['APCS超額篩選人數']} 名，資格 {rec['APCS資格標準級分']} 級分" if rec["APCS超額篩選人數"] else "",
+        "date": rec["第二階段複試日期"], "ann": rec["公告錄取名單日期"], "url": rec["網址"],
+    })
+
+js = "window.TECH=" + json.dumps(tech_out, ensure_ascii=False, separators=(",", ":")) + ";\n"
+js += "window.DIST=" + json.dumps(dist_out, ensure_ascii=False, separators=(",", ":")) + ";\n"
 js += "window.STAR=" + json.dumps(star, ensure_ascii=False, separators=(",", ":")) + ";\n"
 js += "window.APPLY=" + json.dumps(apply, ensure_ascii=False, separators=(",", ":")) + ";\n"
 (HERE / "data.js").write_text(js, encoding="utf-8")
-print(f"star {len(star)} / apply {len(apply)} / dist {len(dist_out)} -> data.js ({len(js.encode())//1024} KB)")
+print(f"star {len(star)} / apply {len(apply)} / dist {len(dist_out)} / tech {len(tech_out)} -> data.js ({len(js.encode())//1024} KB)")

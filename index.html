@@ -12,6 +12,7 @@
   --accent:#1f4fb8; --accent-soft:#e7edfa; --star:#b35f00; --star-soft:#fbefdf;
   --ok:#1c7442; --ok-soft:#e3f3e8; --bad:#b1261b; --bad-soft:#fcebe9; --warn:#855600; --warn-soft:#fdf3d8;
   --on-accent:#ffffff;
+  --tech:#7a3fa8; --tech-soft:#f2eafa;
   --font-body:"Noto Sans TC","Microsoft JhengHei","PingFang TC",system-ui,sans-serif;
   --font-display:"Noto Serif TC","Noto Sans TC","PMingLiU",serif;
 }
@@ -20,12 +21,14 @@
   --accent:#86a8ff; --accent-soft:#1e2a45; --star:#f0a54a; --star-soft:#3a2a15;
   --ok:#64d092; --ok-soft:#173424; --bad:#ff8f84; --bad-soft:#3b1d1b; --warn:#f2c86b; --warn-soft:#3a2f14;
   --on-accent:#0d1422; color-scheme:dark;
+  --tech:#c79bf0; --tech-soft:#2d2140;
 }}
 :root[data-theme="dark"]{
   --bg:#11151c; --card:#1a2029; --ink:#e6eaf0; --muted:#9aa5b5; --line:#2b3340;
   --accent:#86a8ff; --accent-soft:#1e2a45; --star:#f0a54a; --star-soft:#3a2a15;
   --ok:#64d092; --ok-soft:#173424; --bad:#ff8f84; --bad-soft:#3b1d1b; --warn:#f2c86b; --warn-soft:#3a2f14;
   --on-accent:#0d1422; color-scheme:dark;
+  --tech:#c79bf0; --tech-soft:#2d2140;
 }
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.6 var(--font-body)}
@@ -43,16 +46,21 @@ nav a{padding:6px 12px;border-radius:8px;color:var(--muted);text-decoration:none
 nav a.on{background:var(--accent-soft);color:var(--accent);font-weight:600}
 .wrap{max-width:1180px;margin:0 auto}
 main{padding:20px 16px 60px}
-.hero{text-align:center;padding:28px 0 18px}
-.hero h2{font-size:26px;margin:0 0 6px}
-.hero p{color:var(--muted);margin:0}
-.entries{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px;margin-top:26px}
+.hero{text-align:center;padding:36px 0 22px;display:flex;flex-direction:column;align-items:center;gap:10px}
+.hero-kicker{margin:0;font-size:13px;letter-spacing:.12em;color:var(--muted)}
+.hero-title{margin:0;font-family:var(--font-display);font-weight:700;font-size:clamp(28px,5vw,44px);line-height:1.25;letter-spacing:.04em;color:var(--ink);text-wrap:balance}
+.hero-br{display:none}
+.hero-lead{margin:4px 0 0;font-size:clamp(17px,2.4vw,21px);font-weight:500;color:var(--accent)}
+.hero-src{margin:6px 0 0;max-width:68ch;font-size:13px;line-height:1.7;color:var(--muted)}
+@media (max-width:600px){.hero-br{display:inline}}
+.entries{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px;margin-top:22px}
 .entry{display:block;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:28px 24px;text-decoration:none;color:inherit;transition:transform .15s,box-shadow .15s}
 .entry:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.08)}
 .entry .tag{display:inline-block;font-size:13px;padding:2px 10px;border-radius:99px;margin-bottom:10px}
 .entry.star .tag{background:var(--star-soft);color:var(--star)}
 .entry.apply .tag{background:var(--accent-soft);color:var(--accent)}
 .entry.dist .tag{background:var(--ok-soft);color:var(--ok)}
+.entry.tech .tag{background:var(--tech-soft);color:var(--tech)}
 .subj-checks{display:flex;gap:8px 16px;flex-wrap:wrap;font-size:14px;margin-top:6px}
 .subj-checks label{white-space:nowrap}
 .entry h3{margin:0 0 8px;font-size:22px}
@@ -143,6 +151,7 @@ nav a .badge{display:inline-block;min-width:20px;padding:0 6px;margin-left:4px;b
 .step-card dd{margin:0;min-width:0}
 .go{display:inline-block;margin-top:12px;padding:5px 12px;border-radius:8px;background:var(--cs);color:var(--c);text-decoration:none;font-size:14px;font-weight:500}
 .go:hover{text-decoration:underline}
+.go-tech{--c:var(--tech);--cs:var(--tech-soft);align-self:flex-start;margin:0 0 12px}
 .go:focus-visible{outline:2px solid var(--c);outline-offset:2px}
 .extra-routes{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
 .xroute{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;font-size:14px;min-width:0}
@@ -171,13 +180,13 @@ nav a .badge{display:inline-block;min-width:20px;padding:0 6px;margin-left:4px;b
 .xroute .links{margin-top:auto;padding-top:10px}
 .xroute > ul,.xroute > p:not(.xtag){margin-bottom:12px}
 @media (prefers-reduced-motion:reduce){.entry{transition:none}}
-@media (max-width:600px){.hero h2{font-size:21px} nav{margin-left:0}}
+@media (max-width:600px){header{padding-block:10px} header .wrap{gap:6px 10px} header h1{font-size:16px;flex:1} nav{order:3;width:100%;margin-left:0;flex-wrap:wrap;gap:2px} nav a{padding:4px 8px;font-size:14px} .theme-btn{padding:3px 10px}}
 </style>
 </head>
 <body>
 <header><div class="wrap">
   <h1 onclick="go('')">115 學測五標志願篩選</h1>
-  <nav><a href="#star" id="nav-star">繁星推薦</a><a href="#apply" id="nav-apply">個人申請</a><a href="#dist" id="nav-dist">分發入學</a><a href="#compare" id="nav-compare">選擇庫<span class="badge" id="pin-count">0</span></a></nav>
+  <nav><a href="#star" id="nav-star">繁星推薦</a><a href="#apply" id="nav-apply">個人申請</a><a href="#dist" id="nav-dist">分發入學</a><a href="#tech" id="nav-tech">四技申請</a><a href="#compare" id="nav-compare">選擇庫<span class="badge" id="pin-count">0</span></a></nav>
   <button class="theme-btn" id="theme-btn" type="button" aria-label="切換白天／夜間模式"><span class="theme-ico" aria-hidden="true"></span><span id="theme-label">夜間</span></button>
 </div></header>
 
@@ -185,13 +194,16 @@ nav a .badge{display:inline-block;min-width:20px;padding:0 6px;margin-left:4px;b
   <!-- 首頁 -->
   <section id="home">
     <div class="hero">
-      <h2>輸入學測成績，找出符合檢定標準的校系</h2>
-      <p>資料來源：大學甄選入學委員會 115 學年度校系分則、115 學年度大學分發入學招生簡章；五標採 115 學年度學測成績標準</p>
+      <p class="hero-kicker">115 學年度 · 繁星推薦 · 個人申請 · 分發入學 · 四技申請</p>
+      <h2 class="hero-title">台灣高中學生升大學<br class="hero-br">進路校系分析</h2>
+      <p class="hero-lead">輸入學測成績，找出符合檢定標準的校系</p>
+      <p class="hero-src">資料來源：大學甄選入學委員會 115 學年度校系分則、115 學年度大學分發入學招生簡章、115 學年度四技申請入學招生資料；五標採 115 學年度學測成績標準</p>
     </div>
     <div class="entries">
       <a class="entry star" href="#star"><span class="tag">1,664 校系</span><h3>繁星推薦</h3><p>依學測／英聽檢定標準與「在校學業成績全校排名百分比」篩選，並列出分發比序項目。</p></a>
       <a class="entry apply" href="#apply"><span class="tag">2,206 校系</span><h3>個人申請</h3><p>依第一階段學測／英聽檢定標準篩選，並列出篩選倍率、採計方式與指定項目。</p></a>
       <a class="entry dist" href="#dist"><span class="tag">1,764 學系</span><h3>分發入學</h3><p>依學測／英聽檢定標準與分科測驗應考科目篩選，並列出採計科目、加權倍率與同分參酌順序。</p></a>
+      <a class="entry tech" href="#tech"><span class="tag">593 系組</span><h3>四技申請</h3><p>普通高中生以學測成績申請科技大學，依採計科目計算學測加權平均，並列出複試人數與評分比例。</p></a>
     </div>
     <!-- 升大學管道介紹 -->
     <section class="routes" aria-labelledby="routes-title">
@@ -263,6 +275,7 @@ nav a .badge{display:inline-block;min-width:20px;padding:0 6px;margin-left:4px;b
           <h4>四技申請</h4>
           <p class="xtag">普通高中生申請科技大學</p>
           <p>持學測成績申請科技大學，最多填報 6 個志願。第一階段看學測成績，第二階段參加複試與資料審查。</p>
+            <a class="go go-tech" href="#tech">查詢四技申請系組 →</a>
             <div class="links"><span class="links-t">官方網站</span><a href="https://www.jctv.ntut.edu.tw/caac/" target="_blank" rel="noopener">科技校院日間部四年制申請入學聯合招生委員會<span class="ext" aria-hidden="true">↗</span></a></div>
         </article>
         <article class="xroute">
@@ -312,7 +325,7 @@ nav a .badge{display:inline-block;min-width:20px;padding:0 6px;margin-left:4px;b
       <div class="checks">
         <label><input type="checkbox" id="show-all"> 同時顯示未符合的校系</label>
         <label><input type="checkbox" id="hide-skill"> 排除需術科考試</label>
-        <label id="apcs-wrap"><input type="checkbox" id="hide-apcs"> 排除需 APCS 的校系</label>
+        <label id="apcs-wrap"><input type="checkbox" id="hide-apcs"> <span id="apcs-label">排除需 APCS 的校系</span></label>
       </div>
       <details class="ref" style="margin-top:12px"><summary>115 學年度學測五標對照（綠色為你的成績達到的標準）</summary><table class="std-table" id="std-table"></table>
         <p class="note">英聽分級：A 級 ＞ B 級 ＞ C 級 ＞ F 級。成績欄留空代表「未考／不採計」，遇到有該科檢定的校系視為未通過。<br>數學A 與 數學B 同時設檢定時，視為「擇一通過即可」。</p>
@@ -338,7 +351,7 @@ nav a .badge{display:inline-block;min-width:20px;padding:0 6px;margin-left:4px;b
   </section>
 </main>
 
-<script src="data.js"></script>
+<script src="data.js?v=20260930"></script>
 <script>
 const SUBJ = ["國文","英文","數學A","數學B","社會","自然"];
 const LEVELS = ["頂標","前標","均標","後標","底標"];
@@ -541,6 +554,35 @@ function renderDist(r, res){
   </div></div>`;
 }
 
+// 四技申請：沒有五標檢定，第一階段依學測採計科目的加權平均成績篩選
+function techRow(r, sc){
+  const subs = Object.entries(r.w);
+  const missing = subs.filter(([s]) => sc[s] === "" || sc[s] == null).map(([s]) => s);
+  let sum = 0, wsum = 0;
+  for (const [s, w] of subs){ if (!missing.includes(s)){ sum += (+sc[s]) * parseFloat(w); wsum += parseFloat(w); } }
+  const avg = !missing.length && wsum ? Math.round(sum / wsum * 100) / 100 : null;
+  return {ok: !missing.length, missing, avg, total: !missing.length ? Math.round(sum * 100) / 100 : null};
+}
+function renderTech(r, res){
+  const flags = [];
+  if (r.apcs) flags.push(`<span class="pill warn">APCS 超額篩選</span>`);
+  if (res.missing.length) flags.push(`<span class="pill bad">未應考：${esc(res.missing.join("、"))}</span>`);
+  if (res.avg != null) flags.push(`<span class="pill ok">學測加權平均 ${res.avg}</span>`);
+  const w = Object.entries(r.w).map(([s, x]) => `<span class="${res.missing.includes(s) ? "bad" : "ok"}">${s} ×${esc(x)}</span>`).join("");
+  return `<div class="row"><div class="top">
+    <div class="name"><b>${esc(r.s)} ${esc(r.d)}</b><small>${r.c}</small>
+      <div class="stds">${w}</div></div>
+    <div class="meta">${pinBtn("tech", r.c)}<span class="pill ${res.ok ? "ok" : "bad"}">${res.ok ? "可申請" : "缺考科"}</span>
+      <span class="pill">${esc(r.reg)}</span><span class="pill">名額 ${esc(r.q)}</span><span class="pill">預計複試 ${esc(r.ex)}</span>${flags.join("")}</div>
+  </div><div class="more">
+    <table><tr><th>順序</th><th>同分參酌項目</th><th>佔總成績比例</th></tr>${r.tie.map((t, i) => `<tr><td>${i + 1}</td><td>${esc(t[0])}</td><td>${t[1] ? esc(t[1]) + "%" : "--"}</td></tr>`).join("")}</table>
+    <div>第二階段評分項目：${esc(r.s2.join("、"))}</div>
+    <div>該校可選填系組數：${esc(r.lim)}　第二階段複試費：${esc(r.fee)} 元　複試日期：${esc(r.date || "不須到校")}　公告錄取：${esc(r.ann)}</div>
+    ${r.apcs ? `<div>APCS 超額篩選：${esc(r.apcs)}</div>` : ""}
+    ${r.url ? `<div><a href="${esc(r.url)}" target="_blank" rel="noopener">系組網站 ↗</a></div>` : ""}
+  </div></div>`;
+}
+
 function weighted(r, sc){ // 個人申請：依學測成績採計方式計算加權級分（僅供參考）
   let sum = 0, used = false;
   for (const [s,, , w] of r.sub){
@@ -617,12 +659,12 @@ function refresh(resetPage = true){
   const out = [];
   let okCount = 0;
   for (const r of data){
-    if (mode !== "dist" && grp && (mode === "star" ? r.g : r.cat) !== grp) continue;
+    if (mode !== "dist" && grp && (mode === "star" ? r.g : mode === "tech" ? r.reg : r.cat) !== grp) continue;
     if (sch && r.s !== sch) continue;
     if (kw && !(r.s + r.d + r.c).includes(kw)) continue;
     if (hideSkill && (mode === "dist" ? r.sub.some(x => x[0].includes("術科")) : r.sk)) continue;
-    if (mode === "apply" && hideApcs && r.apcs) continue;
-    const res = mode === "star" ? starRow(r, sc, rank) : mode === "apply" ? applyRow(r, sc) : distRow(r, sc, ast, needAll, raw, astScore);
+    if ((mode === "apply" || mode === "tech") && hideApcs && r.apcs) continue;
+    const res = mode === "star" ? starRow(r, sc, rank) : mode === "apply" ? applyRow(r, sc) : mode === "tech" ? techRow(r, sc) : distRow(r, sc, ast, needAll, raw, astScore);
     if (res.ok) okCount++;
     if (res.ok || showAll) out.push([r, res]);
   }
@@ -630,18 +672,18 @@ function refresh(resetPage = true){
   $("count-note").textContent = `個校系符合條件${showAll ? `（共列出 ${out.length} 筆）` : ""}` +
     (mode === "dist" && needAll && !ast.length ? "　← 請先勾選分科測驗應考科目（每個學系都至少採計 1 科分科）" : "");
   const slice = out.slice(0, shown);
-  $("list").innerHTML = slice.map(([r,res]) => mode === "star" ? renderStar(r, res) : mode === "apply" ? renderApply(r, res, sc) : renderDist(r, res)).join("")
+  $("list").innerHTML = slice.map(([r,res]) => mode === "star" ? renderStar(r, res) : mode === "apply" ? renderApply(r, res, sc) : mode === "tech" ? renderTech(r, res) : renderDist(r, res)).join("")
     || '<div class="card note">沒有符合條件的校系，試著調整篩選條件。</div>';
   $("more-btn").classList.toggle("hidden", out.length <= shown);
   $("more-btn").textContent = `顯示更多（還有 ${out.length - shown} 筆）`;
 }
 
-function dataOf(m){ return m === "star" ? STAR : m === "apply" ? APPLY : DIST; }
+function dataOf(m){ return m === "star" ? STAR : m === "apply" ? APPLY : m === "tech" ? TECH : DIST; }
 function setupFilters(){
   const data = dataOf(mode);
-  const groups = mode === "dist" ? [] : [...new Set(data.map(r => mode === "star" ? r.g : r.cat))].filter(Boolean);
+  const groups = mode === "dist" ? [] : [...new Set(data.map(r => mode === "star" ? r.g : mode === "tech" ? r.reg : r.cat))].filter(Boolean);
   if (mode === "star"){ const order = "一二三四五六七八"; groups.sort((a,b) => order.indexOf(a[1]) - order.indexOf(b[1])); }
-  $("grp-label").textContent = mode === "star" ? "學群類別" : "校系類別";
+  $("grp-label").textContent = mode === "star" ? "學群類別" : mode === "tech" ? "學校區位" : "校系類別";
   $("grp").innerHTML = '<option value="">全部</option>' + groups.map(g => `<option>${esc(g)}</option>`).join("");
   const schools = [...new Set(data.map(r => r.s))];
   $("sch").innerHTML = '<option value="">全部學校</option>' + schools.map(s => `<option>${esc(s)}</option>`).join("");
@@ -651,19 +693,20 @@ function setupFilters(){
 function go(h){ location.hash = h; }
 function route(){
   const h = location.hash.replace("#", "");
-  const isQuery = h === "star" || h === "apply" || h === "dist";
+  const isQuery = h === "star" || h === "apply" || h === "dist" || h === "tech";
   const isCmp = h === "compare";
   $("home").classList.toggle("hidden", isQuery || isCmp);
   $("query").classList.toggle("hidden", !isQuery);
   $("compare").classList.toggle("hidden", !isCmp);
-  ["star","apply","dist","compare"].forEach(k => $("nav-" + k).classList.toggle("on", h === k));
+  ["star","apply","dist","tech","compare"].forEach(k => $("nav-" + k).classList.toggle("on", h === k));
   if (isCmp){ renderCompare(); window.scrollTo(0, 0); return; }
   if (!isQuery) return;
   mode = h;
   $("q-title").textContent = {star: "繁星推薦｜輸入學測成績與在校排名", apply: "個人申請｜輸入學測成績",
-    dist: "分發入學｜輸入學測成績與分科測驗應考科目"}[mode];
+    dist: "分發入學｜輸入學測成績與分科測驗應考科目", tech: "四技申請｜輸入學測成績"}[mode];
   $("rank-field").classList.toggle("hidden", mode !== "star");
-  $("apcs-wrap").classList.toggle("hidden", mode !== "apply");
+  $("apcs-wrap").classList.toggle("hidden", mode !== "apply" && mode !== "tech");
+  $("apcs-label").textContent = mode === "tech" ? "排除採計 APCS 超額篩選的系組" : "排除需 APCS 的校系";
   $("dist-field").classList.toggle("hidden", mode !== "dist");
   $("grp").parentElement.classList.toggle("hidden", mode === "dist");
   setupFilters();
@@ -673,8 +716,8 @@ function route(){
 
 // ---------- 選擇庫 ----------
 // 瀏覽器暫存一定會用；已登入且可寫入的檢視者，另外同步到這份網頁的個人私有資料（換裝置也看得到）
-const CH_NAME = {star: "繁星推薦", apply: "個人申請", dist: "分發入學"};
-let pins = {star: [], apply: [], dist: []};
+const CH_NAME = {star: "繁星推薦", apply: "個人申請", dist: "分發入學", tech: "四技申請"};
+let pins = {star: [], apply: [], dist: [], tech: []};
 let cloud = null, cloudTimer = null, cloudBusy = false, cloudDirty = false;
 (function loadLocalPins(){
   const saved = store.get("pins");
@@ -694,11 +737,11 @@ function savePins(){
   updatePinCount();
   if (cloud){ cloudDirty = true; clearTimeout(cloudTimer); cloudTimer = setTimeout(pushCloud, 800); }
 }
-function updatePinCount(){ $("pin-count").textContent = pins.star.length + pins.apply.length + pins.dist.length; }
+function updatePinCount(){ $("pin-count").textContent = Object.values(pins).reduce((n, a) => n + a.length, 0); }
 async function pushCloud(){
   if (!cloud || cloudBusy) return;
   cloudBusy = true; cloudDirty = false;
-  try { await cloud.ref.set({star: pins.star, apply: pins.apply, dist: pins.dist}); setSync("已同步到你的帳號，換裝置也看得到。"); }
+  try { await cloud.ref.set({...pins}); setSync("已同步到你的帳號，換裝置也看得到。"); }
   catch(e){ cloud = null; setSync("這次只存在這台裝置的瀏覽器。"); }
   cloudBusy = false;
   if (cloudDirty) pushCloud();
@@ -723,7 +766,7 @@ async function initCloud(){
         if (union.length !== remote.length) merged = true;
         pins[k] = union;
       }
-    } else merged = pins.star.length + pins.apply.length + pins.dist.length > 0;
+    } else merged = Object.values(pins).some(a => a.length);
     cloud = {ref};
     store.set("pins", pins); updatePinCount();
     setSync("已同步到你的帳號，換裝置也看得到。");
@@ -747,7 +790,7 @@ function renderCompare(){
   }
   const sc = getScores();
   const cols = rows.map(r => ({r, res: cmpTab === "star" ? starRow(r, sc, $("rank").value.trim())
-    : cmpTab === "apply" ? applyRow(r, sc) : distRow(r, sc, getAst(), $("need-all").checked, getRaw(), getAstScore())}));
+    : cmpTab === "apply" ? applyRow(r, sc) : cmpTab === "tech" ? techRow(r, sc) : distRow(r, sc, getAst(), $("need-all").checked, getRaw(), getAstScore())}));
   const line = (label, fn) => `<tr><th scope="row">${label}</th>${cols.map(fn).join("")}</tr>`;
   const cell = (html, cls = "") => `<td class="${cls}">${html}</td>`;
   const ol = arr => arr.length ? `<ol>${arr.map(t => `<li>${esc(t)}</li>`).join("")}</ol>` : "--";
@@ -790,6 +833,23 @@ function renderCompare(){
     body += line("甄試日期", ({r}) => cell(esc(r.date || "--")));
     body += line("甄試費", ({r}) => cell(esc(r.fee || "--")));
     if (cols.some(({r}) => r.apcs || r.sk)) body += line("特殊條件", ({r}) => cell(esc([r.sk ? "需術科" : "", r.apcs ? "APCS：" + r.apcs : ""].filter(Boolean).join("；") || "--")));
+  } else if (cmpTab === "tech"){
+    body += line("學校區位", ({r}) => cell(esc(r.reg)));
+    body += line("招生名額", ({r}) => cell(`<span class="num">${esc(r.q)}</span>`));
+    body += line("預計複試人數", ({r}) => cell(esc(r.ex)));
+    body += line("學測加權平均", ({res}) => cell(res.avg != null ? `<span class="num">${res.avg}</span>` : "缺考：" + esc(res.missing.join("、"))));
+    for (const s of SUBJ){
+      if (!cols.some(({r}) => r.w[s])) continue;
+      body += line(s + " 權重", ({r, res}) => r.w[s] ? cell("×" + esc(r.w[s]), res.missing.includes(s) ? "bad" : "ok") : cell("--"));
+    }
+    const n = Math.max(...cols.map(({r}) => r.tie.length));
+    for (let i = 0; i < n; i++) body += line(`同分參酌 ${i + 1}`, ({r}) => { const t = r.tie[i]; return cell(t ? esc(t[0]) + (t[1] ? `<br><span class="note">佔 ${esc(t[1])}%</span>` : "") : ""); });
+    body += line("第二階段項目", ({r}) => cell(esc(r.s2.join("、"))));
+    body += line("該校可選填數", ({r}) => cell(esc(r.lim)));
+    body += line("複試日期", ({r}) => cell(esc(r.date || "不須到校")));
+    body += line("複試費", ({r}) => cell(esc(r.fee) + " 元"));
+    body += line("公告錄取", ({r}) => cell(esc(r.ann)));
+    if (cols.some(({r}) => r.apcs)) body += line("APCS 超額篩選", ({r}) => cell(esc(r.apcs || "--")));
   } else {
     body += line("核定名額", ({r}) => cell(`<span class="num">${esc(r.q)}</span>`));
     body += line("加權總分", ({res}) => cell(res.total
