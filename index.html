@@ -124,6 +124,30 @@ nav a .badge{display:inline-block;min-width:20px;padding:0 6px;margin-left:4px;b
 .cmp thead th[scope=row]{z-index:2}
 .cmp td.ok{background:var(--ok-soft);color:var(--ok)}
 .cmp td.bad{background:var(--bad-soft);color:var(--bad)}
+.cmp td.warn{background:var(--warn-soft);color:var(--warn)}
+.cmp td .hy{display:none}
+.cmp td .hyear + .hyear{margin-top:6px;padding-top:6px;border-top:1px dashed var(--line)}
+.cmp td .hline{font-size:12px}
+.verdict{display:inline-block;font-weight:700;font-size:12px;margin-bottom:4px}
+.my-scores{font-size:13px;line-height:1.8;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:8px 12px;margin:0 0 10px}
+.print-only{display:none}
+.print-head{justify-content:space-between;gap:12px;font-size:14px;margin-bottom:8px}
+/* 列印（GitHub Pages 等一般瀏覽器）：只印選擇庫比較，A4 橫式、淺色 */
+@page{size:A4 landscape;margin:10mm}
+@media print{
+  :root,:root[data-theme="dark"]{--bg:#ffffff;--card:#ffffff;--ink:#111111;--muted:#555555;--line:#bbbbbb;
+    --ok:#1c7442;--ok-soft:#e3f3e8;--bad:#b1261b;--bad-soft:#fcebe9;--warn:#855600;--warn-soft:#fdf3d8;--accent:#1f4fb8;color-scheme:light}
+  body{background:#fff;font-size:11px}
+  header,#home,#query,.ctabs,.cmp-ind,#compare > .summary,#clear-confirm,.cmp .x,#print-btn,#clear-tab,#sync-note,#print-msg{display:none!important}
+  main{padding:0}
+  .print-only{display:flex}
+  .cmp-wrap{overflow:visible;border:0}
+  .cmp{font-size:10px;width:100%}
+  .cmp th,.cmp td{min-width:0;max-width:none;padding:4px 6px}
+  .cmp th[scope=row]{position:static}
+  .cmp tr{break-inside:avoid}
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
 .cmp .num{font-variant-numeric:tabular-nums;font-weight:700;font-size:15px}
 .cmp ol{margin:0;padding-left:18px}
 .cmp .x{float:right;border:0;background:none;color:var(--muted);cursor:pointer;font-size:16px;line-height:1;padding:0 0 0 8px}
@@ -378,8 +402,14 @@ nav a .badge{display:inline-block;min-width:20px;padding:0 6px;margin-left:4px;b
     <div class="summary"><b>選擇庫</b><span>把各管道加入的校系並排比較；符合與否依你目前輸入的成績即時判斷。</span></div>
     <a class="cmp-ind" href="indigenous.html"><span><b>原住民族學生升學專區</b>升學保障（加分 10%／35%）、原住民外加名額查詢、原住民專班、醫事人員養成計畫</span><span aria-hidden="true">→</span></a>
     <div class="ctabs" id="ctabs"></div>
-    <div id="cmp-body"></div>
+    <div id="print-area">
+      <div class="print-only print-head"><b>台灣高中學生升大學進路校系分析｜選擇庫比較</b><span id="print-meta"></span></div>
+      <p class="my-scores" id="my-scores"></p>
+      <div id="cmp-body"></div>
+    </div>
     <div class="summary" style="margin-top:12px"><span class="sync" id="sync-note"></span><span style="flex:1"></span>
+      <span class="note" id="print-msg" role="status"></span>
+      <button class="btn primary" id="print-btn" type="button">列印／存成 PDF</button>
       <button class="btn" id="clear-tab">清空此管道</button></div>
     <div class="card hidden" id="clear-confirm" style="margin-top:8px">
       <span id="clear-msg"></span>
@@ -653,11 +683,11 @@ function sieveMine(t, sc){
 const yearsOf = h => Object.keys(h || {}).sort((a, b) => b - a);
 const chip = (txt, cls = "") => `<span class="hchip ${cls}">${txt}</span>`;
 
-function histStar(r){
+function histStar(r, only){
   const h = HISTORY.star[r.c];
   if (!h) return "";
   const rank = $("rank").value.trim();
-  return yearsOf(h).map(y => h[y].map(e => {
+  return yearsOf(h).filter(y => !only || y === only).map(y => h[y].map(e => {
     const label = [e.ins && `《${esc(e.ins)}》`, e.k === "外加" && "外加名額"].filter(Boolean).join(" ");
     const verb = e.g8 ? "通過篩選" : "錄取";
     const rounds = [[1, e.n1], [2, e.n2]].filter(([, n]) => n).map(([k, n]) => {
@@ -674,10 +704,10 @@ function histStar(r){
   }).join("")).join("");
 }
 
-function histApply(r, sc){
+function histApply(r, sc, only){
   const h = HISTORY.apply[r.c];
   if (!h) return "";
-  return yearsOf(h).map(y => {
+  return yearsOf(h).filter(y => !only || y === only).map(y => {
     const {sv, en} = h[y];
     const sieve = sv.map(s => {
       const tag = [s.maj && `《${esc(s.maj)}》`, s.sex !== "無" && s.sex].filter(Boolean).join(" ");
@@ -693,10 +723,10 @@ function histApply(r, sc){
   }).join("");
 }
 
-function histDist(r, res){
+function histDist(r, res, only){
   const h = HISTORY.dist[r.c];
   if (!h) return "";
-  return yearsOf(h).map(y => {
+  return yearsOf(h).filter(y => !only || y === only).map(y => {
     const e = h[y];
     let cmp = "";
     if (e.s && res && res.total){
@@ -714,11 +744,11 @@ function histDist(r, res){
 }
 
 // 四技申請：第一階段最低篩選標準為百分制（加權平均級分 ÷ 15 × 100），換算回級分並與你的加權平均比較
-function histTech(r, res){
+function histTech(r, res, only){
   const h = (HISTORY.tech || {})[r.c];
   if (!h) return "";
   const mine = res && res.avg != null ? Math.round(res.avg / 15 * 10000) / 100 : null;
-  return yearsOf(h).map(y => {
+  return yearsOf(h).filter(y => !only || y === only).map(y => {
     const e = h[y];
     const lv = e.s ? Math.round(+e.s * 15 / 100 * 100) / 100 : null;
     const cmp = e.s && mine != null ? chip(`你 ${mine}`, mine >= +e.s ? "ok" : "bad") : "";
@@ -738,6 +768,44 @@ function withHist(html, m, r, res, sc){
   if (!html.startsWith(open)) return html;
   return `<div class="row"><div class="row-grid"><div class="row-main">${html.slice(open.length, -6)}</div>${histPanel(m, r, res, sc)}</div></div>`;
 }
+// 選擇庫：某一年度你的成績相對於當年錄取標準
+function histYear(m, r, res, sc, y){
+  return m === "star" ? histStar(r, y) : m === "apply" ? histApply(r, sc, y) : m === "dist" ? histDist(r, res, y) : histTech(r, res, y);
+}
+function histVerdict(m, r, res, sc, y){
+  const h = (HISTORY[m] || {})[r.c];
+  if (!h || !h[y]) return "";
+  if (m === "star"){
+    const rank = $("rank").value.trim();
+    if (rank === "") return "";
+    const e = h[y].find(x => x.k === "一般") || h[y][0];
+    // 第一輪或第二輪的「在校學業」錄取百分比，你的排名在任一輪之內就算有利
+    const cuts = [1, 2].map(k => e.it[0] && e.it[0][0] === "在校學業" ? e.it[0][k] : "").filter(v => /%$/.test(v)).map(parseFloat);
+    if (!cuts.length) return "";
+    return +rank <= Math.max(...cuts) ? "ok" : "bad";
+  }
+  if (m === "apply"){
+    const seq = (h[y].sv[0] || {}).seq || [];
+    const marks = seq.map(t => sieveMine(t, sc)).filter(Boolean);
+    if (!marks.length) return "";
+    if (!marks[0].ok) return "bad";                 // 第一順序就低於最低級分：不利
+    return marks.every(x => x.ok) ? "ok" : "warn";  // 第一順序過、後面有不足：邊緣（同級分時才會比到）
+  }
+  if (m === "dist"){
+    const e = h[y];
+    if (!e.s || !res || !res.total) return "";
+    const [lo, hi] = res.total, cut = +e.s;
+    return lo >= cut ? "ok" : hi >= cut ? "warn" : "bad";
+  }
+  if (m === "tech"){
+    const e = h[y];
+    if (!e.s || !res || res.avg == null) return "";
+    return res.avg / 15 * 100 >= +e.s ? "ok" : "bad";
+  }
+  return "";
+}
+const VERDICT_TXT = {ok: "有利", warn: "邊緣", bad: "不利"};
+
 // 選擇庫比較表用的一行摘要
 function histBrief(m, r, res){
   const y = k => yearsOf((HISTORY[m] || {})[r.c])[0];
@@ -956,16 +1024,36 @@ async function initCloud(){
   } catch(e){ cloud = null; }
 }
 
+// 比較頁上方：這次比對所依據的成績（列印時一併印出）
+function renderMyScores(){
+  const sc = getScores();
+  const parts = SUBJ.map(s => `${s} ${sc[s] === "" ? "未考" : sc[s] + " 級分"}`);
+  parts.push(`英聽 ${sc["英聽"] || "未考"}`);
+  const extra = [];
+  const rank = $("rank").value.trim();
+  if (cmpTab === "star") extra.push(`在校學業成績 ${rank ? "前 " + rank + "%" : "未填"}`);
+  if (cmpTab === "dist"){
+    const raw = getRaw(), ast = getAst(), as = getAstScore();
+    const rw = Object.entries(raw).map(([k, v]) => `${k} ${v}`);
+    if (rw.length) extra.push(`學測原始分數：${rw.join("、")}`);
+    extra.push(`分科／術科：${ast.length ? ast.map(k => `${k}${as[k] != null ? " " + as[k] : "（未填分數）"}`).join("、") : "未勾選"}`);
+  }
+  $("my-scores").innerHTML = `<b>你的成績</b>　${parts.join("　")}${extra.length ? "<br>" + extra.join("　") : ""}`;
+}
+
 let cmpTab = null;
 function renderCompare(){
   const tabs = Object.keys(CH_NAME);
   if (!cmpTab) cmpTab = tabs.find(t => pins[t].length) || "star";
   $("ctabs").innerHTML = tabs.map(t => `<button class="${t === cmpTab ? "on" : ""}" data-tab="${t}">${CH_NAME[t]}（${pins[t].length}）</button>`).join("");
   $("clear-tab").classList.toggle("hidden", !pins[cmpTab].length);
+  $("print-btn").classList.toggle("hidden", !pins[cmpTab].length);
+  $("print-msg").textContent = "";
   $("clear-confirm").classList.add("hidden");
   const byCode = Object.fromEntries(dataOf(cmpTab).map(r => [r.c, r]));
   const rows = pins[cmpTab].map(c => byCode[c]).filter(Boolean);
   if (!rows.length){
+    $("my-scores").innerHTML = "";
     $("cmp-body").innerHTML = `<div class="card empty">${CH_NAME[cmpTab]}的選擇庫還是空的。<br>到 <a href="#${cmpTab}">${CH_NAME[cmpTab]}</a> 查詢結果中按「☆ 加入選擇庫」，就會出現在這裡並排比較。</div>`;
     return;
   }
@@ -976,7 +1064,24 @@ function renderCompare(){
   const cell = (html, cls = "") => `<td class="${cls}">${html}</td>`;
   const ol = arr => arr.length ? `<ol>${arr.map(t => `<li>${esc(t)}</li>`).join("")}</ol>` : "--";
   let body = line("判定", ({res}) => cell(res.ok ? "符合" : "未符合", res.ok ? "ok" : "bad"));
-  body += line("歷年錄取結果", ({r, res}) => cell(esc(histBrief(cmpTab, r, res))));
+  // 近三年錄取結果：每一年一列，整格依你的成績相對當年標準上色
+  const years = [...new Set(cols.flatMap(({r}) => yearsOf((HISTORY[cmpTab] || {})[r.c])))].sort((a, b) => b - a).slice(0, 3);
+  if (years.length){
+    body += line(`近 ${years.length} 年綜合`, ({r, res}) => {
+      const v = years.map(y => histVerdict(cmpTab, r, res, sc, y)).filter(Boolean);
+      if (!v.length) return cell(yearsOf((HISTORY[cmpTab] || {})[r.c]).length ? "無法比較（成績未填或缺考）" : "尚無歷年資料");
+      const ok = v.filter(x => x === "ok").length;
+      return cell(`<b>${v.length} 年中 ${ok} 年有利</b>${v.includes("warn") ? `<br><span class="note">${v.filter(x => x === "warn").length} 年在邊緣</span>` : ""}`,
+        ok === v.length ? "ok" : ok === 0 && !v.includes("warn") ? "bad" : "warn");
+    });
+    for (const y of years){
+      body += line(`${y} 錄取結果`, ({r, res}) => {
+        const html = histYear(cmpTab, r, res, sc, y);
+        const v = histVerdict(cmpTab, r, res, sc, y);
+        return cell(html ? `${v ? `<span class="verdict">${VERDICT_TXT[v]}</span>` : ""}${html}` : '<span class="note">當年無對應校系</span>', v);
+      });
+    }
+  }
   if (cmpTab === "star"){
     body += line("學群類別", ({r}) => cell(esc(r.g)));
     body += line("招生名額", ({r}) => cell(`<span class="num">${esc(r.q)}</span>`));
@@ -1050,7 +1155,8 @@ function renderCompare(){
   }
   const head = `<tr><th scope="row">校系</th>${cols.map(({r}) => `<th scope="col"><button class="x" data-unpin="${cmpTab}:${r.c}" aria-label="移出選擇庫">×</button>${esc(r.s)}<br>${esc(r.d)} <span class="note">${r.c}</span></th>`).join("")}</tr>`;
   $("cmp-body").innerHTML = `<div class="cmp-wrap"><table class="cmp"><thead>${head}</thead><tbody>${body}</tbody></table></div>
-    <p class="note">綠色＝依你目前輸入的成績符合，紅色＝未符合或缺考。成績請到各管道頁面輸入，這裡會自動套用。</p>`;
+    <p class="note">綠色＝依你目前輸入的成績符合或達到當年標準（有利），紅色＝未符合、缺考或低於當年標準（不利），黃色＝剛好在邊緣。成績請到各管道頁面輸入，這裡會自動套用。歷年結果僅供參考，實際錄取以當年度招生結果為準。</p>`;
+  renderMyScores();
 }
 
 // ---------- 白天／夜間模式 ----------
@@ -1105,6 +1211,71 @@ $("cmp-body").addEventListener("click", e => {
   const b = e.target.closest("[data-unpin]");
   if (b){ const [m, code] = b.dataset.unpin.split(":"); togglePin(m, code); renderCompare(); }
 });
+// 列印／存成 PDF：一般瀏覽器用 window.print()；claude.ai 檢視環境不能開列印對話框，
+// 改在頁面內用 html2canvas + jsPDF 產生 PDF，再交給 downloads 讓使用者存檔
+function loadScript(src){
+  return new Promise((ok, fail) => {
+    if (document.querySelector(`script[src="${src}"]`)) return ok();
+    const el = document.createElement("script");
+    el.src = src; el.onload = () => ok(); el.onerror = () => fail(new Error("load " + src));
+    document.head.appendChild(el);
+  });
+}
+async function makePdf(){
+  await loadScript("https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js");
+  await loadScript("https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js");
+  const root = document.documentElement, prevTheme = root.dataset.theme;
+  root.dataset.theme = "light";                       // PDF 一律用淺色
+  const src = $("print-area");
+  const box = document.createElement("div");          // 展開成完整寬度（不要橫向捲軸）再截圖
+  box.style.cssText = "position:fixed;left:-100000px;top:0;background:#fff;padding:16px;width:max-content;max-width:2600px";
+  const clone = src.cloneNode(true);
+  clone.querySelectorAll(".print-only").forEach(el => el.style.display = "flex");
+  clone.querySelectorAll(".x").forEach(el => el.remove());
+  clone.querySelectorAll(".cmp-wrap").forEach(el => { el.style.overflow = "visible"; });
+  clone.querySelectorAll(".cmp th[scope=row]").forEach(el => { el.style.position = "static"; });
+  box.appendChild(clone);
+  document.body.appendChild(box);
+  try {
+    const canvas = await html2canvas(box, {scale: 2, backgroundColor: "#ffffff", useCORS: true});
+    const {jsPDF} = window.jspdf;
+    const pdf = new jsPDF({orientation: "landscape", unit: "mm", format: "a4"});
+    const pw = 297 - 20, ph = 210 - 20;               // A4 橫式扣掉 10mm 邊界
+    const pxPerMm = canvas.width / pw;
+    const pagePx = Math.floor(ph * pxPerMm);
+    for (let y = 0, i = 0; y < canvas.height; y += pagePx, i++){
+      const h = Math.min(pagePx, canvas.height - y);
+      const part = document.createElement("canvas");
+      part.width = canvas.width; part.height = h;
+      part.getContext("2d").drawImage(canvas, 0, y, canvas.width, h, 0, 0, canvas.width, h);
+      if (i) pdf.addPage();
+      pdf.addImage(part.toDataURL("image/jpeg", 0.92), "JPEG", 10, 10, pw, h / pxPerMm);
+    }
+    return pdf.output("blob");
+  } finally {
+    box.remove();
+    if (prevTheme) root.dataset.theme = prevTheme; else delete root.dataset.theme;
+  }
+}
+$("print-btn").addEventListener("click", async () => {
+  const d = new Date();
+  const stamp = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  $("print-meta").textContent = `${CH_NAME[cmpTab]}　${pins[cmpTab].length} 個校系　列印日期 ${stamp}`;
+  if (!pins[cmpTab].length){ $("print-msg").textContent = "這個管道的選擇庫是空的，先加入校系再列印。"; return; }
+  const dl = window.claude && window.claude.use ? await window.claude.use("downloads") : null;
+  if (!dl){ window.print(); return; }                 // 一般瀏覽器：叫出列印對話框，可選「另存為 PDF」
+  const btn = $("print-btn");
+  btn.disabled = true; $("print-msg").textContent = "正在產生 PDF…";
+  try {
+    const blob = await makePdf();
+    await dl.save({filename: `選擇庫比較_${CH_NAME[cmpTab]}_${stamp}.pdf`, data: blob});
+    $("print-msg").textContent = "已存成 PDF。";
+  } catch (e){
+    $("print-msg").textContent = e && e.code === "declined" ? "已取消存檔。"
+      : e && e.code ? "這裡無法存檔，請改用 GitHub Pages 網址列印。" : "產生 PDF 失敗，請稍後再試。";
+  } finally { btn.disabled = false; }
+});
+
 $("clear-tab").addEventListener("click", () => {
   $("clear-msg").textContent = `要把${CH_NAME[cmpTab]}選擇庫裡的 ${pins[cmpTab].length} 個校系全部移除嗎？`;
   $("clear-confirm").classList.remove("hidden");
