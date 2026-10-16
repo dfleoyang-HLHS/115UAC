@@ -54,6 +54,8 @@ main{padding:20px 16px 60px}
 .hero-ind{font-size:14px;text-decoration:none;padding:5px 14px;border-radius:99px;background:var(--ok-soft);color:var(--ok)}
 .hero-ind:hover{text-decoration:underline}
 .hero-src{margin:6px 0 0;max-width:68ch;font-size:13px;line-height:1.7;color:var(--muted)}
+.hero-count{margin:0;font-size:13px;color:var(--muted)}
+.hero-count b{color:var(--ink);font-variant-numeric:tabular-nums}
 @media (max-width:600px){.hero-br{display:inline}}
 .entries{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px;margin-top:22px}
 .entry{display:block;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:28px 24px;text-decoration:none;color:inherit;transition:transform .15s,box-shadow .15s}
@@ -245,6 +247,7 @@ nav a .badge{display:inline-block;min-width:20px;padding:0 6px;margin-left:4px;b
       <p class="hero-lead">輸入學測成績，找出符合檢定標準的校系</p>
       <a class="hero-ind" href="indigenous.html">原住民族學生升學專區：升學保障、原住民專班、醫事人員養成計畫 →</a>
       <p class="hero-src">資料來源：大學甄選入學委員會 115 學年度校系分則、115 學年度大學分發入學招生簡章、115 學年度四技申請入學招生資料；五標採 115 學年度學測成績標準</p>
+      <p class="hero-count" id="view-count" hidden>自 2026.10.16 起累計瀏覽 <b id="view-count-n">0</b> 次</p>
     </div>
     <div class="entries">
       <a class="entry star" href="#star"><span class="tag">1,664 校系</span><h3>繁星推薦</h3><p>依學測／英聽檢定標準與「在校學業成績全校排名百分比」篩選，並列出分發比序項目。</p></a>
@@ -1285,6 +1288,19 @@ $("clear-yes").addEventListener("click", () => { pins[cmpTab] = []; savePins(); 
 window.addEventListener("hashchange", route);
 route();
 initCloud();
+
+// 瀏覽計數：每次載入頁面 +1（切換頁籤不重複計），累計值存在外部服務，網站更新不會歸零；
+// 本機開啟（file:// 或 localhost）只讀取、不計數。連不上服務時整行不顯示，不影響頁面。
+(function(){
+  const box = $("view-count"), num = $("view-count-n");
+  if (!box) return;
+  const local = location.protocol === "file:" || ["", "localhost", "127.0.0.1"].includes(location.hostname);
+  const url = "https://abacus.jasoncameron.dev/" + (local ? "get" : "hit") + "/dfleoyang-hlhs-115uac/index-views";
+  fetch(url, {cache: "no-store"})
+    .then(r => r.ok ? r.json() : r.status === 404 ? {value: 0} : Promise.reject())
+    .then(d => { num.textContent = Number(d.value).toLocaleString("en-US"); box.hidden = false; })
+    .catch(() => {});
+})();
 </script>
 </body>
 </html>
